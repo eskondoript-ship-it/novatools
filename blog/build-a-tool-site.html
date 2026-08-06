@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang='en' data-base='../'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>How one HTML file serves 498 browser tools</title>
+<meta name='description' content='Generating tools from tables, giving each one its own URL, and why this site has no framework, no build step and no server.'>
+<link rel='canonical' href='https://REPLACE-ME/blog/build-a-tool-site.html'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+
+<meta property='og:type' content='article'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/blog/build-a-tool-site.html'>
+<meta property='og:title' content='How this site serves 498 tools from one file — NovaTools'>
+<meta property='og:description' content='Generating tools from tables, giving each one its own URL, and why this site has no framework, no build step and no server.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='How this site serves 498 tools from one file — NovaTools'>
+<meta name='twitter:description' content='Generating tools from tables, giving each one its own URL, and why this site has no framework, no build step and no server.'>
+
+<!-- The theme is read before first paint. Doing this from the deferred script
+     instead would show a white flash to anyone who chose dark. -->
+<script>try{var t=localStorage.getItem('nt_theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel='stylesheet' href='../nt.css'>
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "BlogPosting",
+   "headline": "How this site serves 498 tools from one file",
+   "description": "A walkthrough of how NovaTools runs 498 browser tools from a single HTML file: generating tools from tables, one URL per tool, and why there is no build step.",
+   "url": "https://REPLACE-ME/blog/build-a-tool-site.html",
+   "datePublished": "2026-08-06",
+   "dateModified": "2026-08-06",
+   "articleSection": "Tutorials",
+   "inLanguage": "en-GB",
+   "isAccessibleForFree": true,
+   "author": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://REPLACE-ME/blog/build-a-tool-site.html"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://REPLACE-ME/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Blog",
+     "item": "https://REPLACE-ME/blog.html"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Tutorials",
+     "item": "https://REPLACE-ME/blog/build-a-tool-site.html"
+    }
+   ]
+  }
+ ]
+}</script>
+</head>
+<body>
+<a class='skip' href='#main'>Skip to content</a>
+<div class='aurora' aria-hidden='true'><div class='blob b1'></div><div class='blob b2'></div><div class='gridlines'></div></div>
+
+<header class='nav' id='ntnav'></header>
+
+<main id='main' class='page'>
+<nav class='crumbs' aria-label='Breadcrumb'><a href='../index.html'>Home</a> &rsaquo; <a href='../blog.html'>Blog</a> &rsaquo; Tutorials</nav>
+
+<article id='article'>
+<span class='eyebrow'>Tutorials</span>
+<h1>How this site serves 498 tools from one file</h1>
+<p class='lede'>No framework, no build step, no server. What that buys, what it costs, and the three techniques that make it hold together.</p>
+<div class='postmeta'>
+  <span class='avatar' aria-hidden='true'>N</span>
+  <span>NovaTools</span>
+  <span aria-hidden='true'>&middot;</span>
+  <time datetime='2026-08-06'>6 August 2026</time>
+  <span aria-hidden='true'>&middot;</span>
+  <span id='readtime'>&nbsp;</span>
+  <a class='tag' href='../blog.html#tutorials'>Tutorials</a>
+</div>
+
+<div class='adslot' data-ad='belowHero'></div>
+<div class='toc' id='toc' hidden></div>
+
+<div class='prose'>
+
+<h2>The constraint</h2>
+<p>This whole site is one HTML file. The styling is in it, the code is in it, all
+498 tools are in it. There is no framework, no bundler, no package manager and no
+server. You can save the page to a USB stick and every tool still works.</p>
+<p>That was a decision rather than an accident, and it is worth setting out what
+it buys before explaining how it works.</p>
+<ul>
+<li><strong>It works offline.</strong> Once the page is loaded, everything is
+already there.</li>
+<li><strong>It cannot rot.</strong> There is no dependency to go unmaintained, no
+build that stops reproducing in two years, no lockfile to resolve.</li>
+<li><strong>The privacy claim is structural.</strong> With no server there is
+nowhere to send your data, so &ldquo;nothing is uploaded&rdquo; is a fact about
+the architecture rather than a promise about conduct.</li>
+<li><strong>It deploys by copying a file.</strong> Any static host will do.</li>
+</ul>
+<p>The costs are real too: no server means no AI features, no accounts and no
+saved work, and one file means the browser parses all of it up front.</p>
+
+<h2>1. Generate tools from tables, not from copies</h2>
+<p>498 hand-written tools would be unmaintainable. But most of the catalogue is
+not 498 distinct ideas &mdash; it is a handful of shapes with a lot of
+parameters. &ldquo;Resize to a YouTube thumbnail&rdquo; and &ldquo;resize to a
+TikTok cover&rdquo; are the same twenty lines with different numbers.</p>
+<p>So the sizes live in a table, and one loop turns each row into a registered
+tool with its own id, its own description and its own implementation. The
+character-limit counters work the same way, as do the calculators and the unit
+conversions. Correcting a platform size is a one-line change to data, and the
+tool, its description and its sitemap entry all update together because they are
+all read from the same row.</p>
+<div class='note'><b>The line this must not cross</b>
+A generated entry has to be a genuinely different job. Two placement sizes give
+two different correct answers, so they are two tools. &ldquo;PNG to JPG&rdquo;
+and &ldquo;PNG to WebP&rdquo; are one converter with a dropdown, and listing them
+separately is how a catalogue of thirteen gets advertised as six hundred. Every
+table here varies a real parameter &mdash; a dimension, a cap, a factor &mdash;
+never just the title.</div>
+
+<div class='adslot' data-ad='inArticle'></div>
+
+<h2>2. Give every tool its own address</h2>
+<p>A single-page app with one URL is invisible to search engines and impossible
+to bookmark. The fix is small: opening a tool pushes <code>?t=word-counter</code>
+into the address bar with <code>history.pushState</code>, and rewrites the
+document title and meta description to match. Arriving on that URL opens the
+tool directly.</p>
+<p>That gives every tool a shareable link, a working back button, and a
+distinct entry in the sitemap &mdash; which is itself generated from the same
+catalogue, so it can never list a tool that does not exist.</p>
+
+<h2>3. Sort by usefulness, and cap what you render</h2>
+<p>Rendering 498 cards at once is 498 hover-shadow layers and a visibly janky
+scroll on a phone, so the grid stops at 120 and search reaches the rest. That cap
+creates a second problem: in a category of 343 unit conversions, whatever sorts
+last is unreachable by browsing.</p>
+<p>The answer is to rank rather than to raise the cap. Unit pairs are scored by
+how everyday both units are, so &ldquo;kg to lb&rdquo; and &ldquo;MB to GB&rdquo;
+are near the front and &ldquo;nautical mile to yard&rdquo; is not. Ranking by
+table instead &mdash; the obvious first attempt &mdash; put all 72 length pairs
+ahead of every weight pair, which is exactly backwards.</p>
+
+<h2>What the browser already gives you</h2>
+<p>A surprising amount of what these tools need is built in:
+<code>crypto.getRandomValues</code> and <code>crypto.subtle.digest</code> for
+passwords and hashes, canvas for every image operation, <code>Intl</code> for
+dates and number formatting in any locale, <code>FileReader</code> for reading a
+file without uploading it. Reaching for a library is often reaching past
+something already in the platform.</p>
+
+<h2>Would I do it this way again?</h2>
+<p>For this, yes. The single-file constraint is a good fit for a catalogue of
+small independent tools that share a shell, and it makes the honest privacy
+position possible.</p>
+<p>It would be the wrong choice for anything with accounts, persistence or
+collaboration &mdash; those need a server, and pretending otherwise leads to
+storing things in local storage that have no business being there. The
+architecture should follow from what the thing actually does, which in this case
+is: take some input, compute something, give it back, forget it.</p>
+
+</div>
+</article>
+
+<div class='share' id='share'></div>
+
+<section aria-labelledby='related'>
+  <h2 id='related' style='margin-top:44px;font-size:1.2rem'>Keep reading</h2>
+  <div class='cards'><a class='card' href='youtube-thumbnail-size.html'><b>YouTube thumbnail size: 1280 &times; 720, and what actually gets cropped</b><p>The recommended size is well documented. What nobody tells you is how small that image gets before anyone decides whether to click it.</p></a><a class='card' href='social-image-sizes.html'><b>Every social image size that matters, in one place</b><p>Forty-eight placements across thirteen platforms. Which ones share a size, which ones cannot be reused, and why the crop is the part that bites.</p></a><a class='card' href='engagement-rate.html'><b>How to read your engagement rate without fooling yourself</b><p>Three formulas share the name. They give very different numbers from the same post, and the flattering one is the one most people quote.</p></a></div>
+</section>
+
+<div class='adslot' data-ad='betweenSections'></div>
+
+</main>
+
+<div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
+<footer class='foot' id='ntfoot'></footer>
+
+<script src='../nt-config.js'></script>
+<script src='../nt.js' defer></script>
+</body>
+</html>
