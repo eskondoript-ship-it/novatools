@@ -74,14 +74,14 @@ h1 .g { background: linear-gradient(90deg,var(--cyan),var(--mag)); -webkit-backg
 .cat:hover { border-color: rgba(0,240,255,0.5); }
 .cat.on { border-color: var(--cyan); color: var(--cyan); background: rgba(0,240,255,0.12); }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px,1fr)); gap: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%),1fr)); gap: 14px; }
 .tool { text-align: left; border: 1px solid var(--line); border-radius: 16px; padding: 16px 17px;
         background: rgba(255,255,255,0.03); cursor: pointer; color: inherit; font: inherit; transition: .2s; }
 .tool:hover { border-color: rgba(0,240,255,0.5); transform: translateY(-3px);
               box-shadow: 0 14px 40px rgba(0,0,0,0.45); }
 .tool b { display: block; font-size: 1rem; margin-bottom: 5px; }
 .tool p { color: var(--dim); font-size: .82rem; line-height: 1.55; }
-.tool .tag { display: inline-block; margin-top: 9px; font-size: .62rem; letter-spacing: 1.5px; font-weight: 800;
+.tool .tag { display: inline-block; margin-top: 9px; font-size: .75rem; letter-spacing: 1.5px; font-weight: 800;
              text-transform: uppercase; color: var(--cyan); }
 .tool.ai .tag { color: var(--mag); }
 .empty { color: var(--dim); padding: 30px 0; }
@@ -119,7 +119,7 @@ textarea:focus, .field input:focus { border-color: var(--cyan); }
        background: rgba(0,0,0,0.35); white-space: pre-wrap; word-break: break-word; min-height: 46px;
        font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .86rem; line-height: 1.6; }
 .out.err { border-color: var(--mag); color: #ffb3d4; }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px,1fr)); gap: 10px; margin-top: 14px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(96px, 100%),1fr)); gap: 10px; margin-top: 14px; }
 .stat { border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; background: rgba(255,255,255,0.03); }
 .stat b { display: block; font-size: 1.4rem; color: var(--cyan); font-variant-numeric: tabular-nums; }
 .stat span { font-size: .68rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim); }
@@ -176,6 +176,12 @@ textarea:focus, .field input:focus { border-color: var(--cyan); }
    NovaClip assistant, which has a backend and a key of its own.
    --------------------------------------------------------------------------- */
 const TOOLS = [
+  { id:'soundboard', cat:'audio', name:'Sound effects board',
+    desc:'97 effects, every one generated in your browser. Play them, or save any as a WAV.' },
+  { id:'cleanup', cat:'images', name:'Remove something from a photo',
+    desc:'Paint over what you want gone and the surrounding texture is grown in over it.' },
+  { id:'animate-drawing', cat:'images', name:'Animate a drawing',
+    desc:'Photograph a character you drew, drop a skeleton on it, and it walks, waves or dances.' },
   { id:'word-counter', cat:'text', name:'Word counter',
     desc:'Words, characters, sentences and reading time as you type.' },
   { id:'case-converter', cat:'text', name:'Case converter',
@@ -280,6 +286,7 @@ const TOOLS = [
     desc:'Openings that stop the scroll, rewritten until one lands.' }
 ];
 const CATS = [['all','All'],['text','Text'],['developer','Developer'],['images','Images'],
+              ['audio','Audio'],
               ['video','Video'],['generators','Generators'],['converters','Converters'],
               ['math','Maths'],['marketing','Marketing'],['social','Social'],['ai','AI']];
 
@@ -1019,7 +1026,7 @@ const IMPL = {
   },
   'palette': {
     html: '<div class="field"><label>Base colour</label><input id="c" value="#00F0FF"></div>' +
-      '<div id="sw2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;margin-top:14px"></div>' + outBox,
+      '<div id="sw2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(70px, 100%),1fr));gap:8px;margin-top:14px"></div>' + outBox,
     wire() {
       const hex2hsl=h=>{
         const m=/^#?([0-9a-f]{6}|[0-9a-f]{3})$/i.exec(h.trim()); if(!m) return null;
@@ -1359,6 +1366,831 @@ function dl(url, name) {
 }
 function kb(b) { return b > 1048576 ? (b / 1048576).toFixed(2) + ' MB' : (b / 1024).toFixed(1) + ' KB'; }
 
+/* ===========================================================================
+   SOUND EFFECTS BOARD
+   ===========================================================================
+   Every sound here is generated from a recipe at the moment you press it —
+   an oscillator, a noise burst, an envelope, a filter sweep. Nothing is
+   downloaded and nothing is sampled from anywhere.
+
+   That is a deliberate choice rather than a limitation. The obvious way to
+   build a soundboard is to point at a site like MyInstants, and it fails on
+   three counts at once: almost everything on those boards is a clip from a
+   film, a game or a video and is somebody else's copyright; the files move and
+   disappear, so half the board is dead within a year; and a board built from
+   internet meme clips is not something you can put in front of thirteen-year
+   -olds without reading all of it first.
+
+   Synthesis has none of those problems. It is also about 6KB instead of 40MB,
+   it works with the aeroplane mode on, and every sound can be saved as a real
+   WAV file for a video editor.
+   =========================================================================== */
+
+/* ---- the synthesis engine ----
+   Nine generators. Everything in the library below is one of these with
+   different numbers, which is what keeps a 96-sound board this small. */
+const SFX_GEN = {
+  /* A pitch sweep. The backbone of blips, zaps, drops and risers. */
+  tone(c, o, p) {
+    const g = c.createGain(), osc = c.createOscillator();
+    osc.type = p.wave || 'sine';
+    osc.frequency.setValueAtTime(p.f0, 0);
+    osc.frequency[p.exp === false ? 'linearRampToValueAtTime' : 'exponentialRampToValueAtTime'](
+      Math.max(1, p.f1 == null ? p.f0 : p.f1), p.dur);
+    g.gain.setValueAtTime(0, 0);
+    g.gain.linearRampToValueAtTime(p.gain == null ? 0.7 : p.gain, p.atk == null ? 0.005 : p.atk);
+    g.gain.exponentialRampToValueAtTime(0.0001, p.dur);
+    osc.connect(g); g.connect(o); osc.start(0); osc.stop(p.dur);
+  },
+
+  /* Filtered noise. Wind, whooshes, snares, static, rain, applause. */
+  noise(c, o, p) {
+    const n = c.createBufferSource(), buf = c.createBuffer(1, c.sampleRate * p.dur, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    n.buffer = buf;
+    const f = c.createBiquadFilter();
+    f.type = p.filter || 'bandpass';
+    f.Q.value = p.q == null ? 1 : p.q;
+    f.frequency.setValueAtTime(p.f0, 0);
+    f.frequency.exponentialRampToValueAtTime(Math.max(20, p.f1 == null ? p.f0 : p.f1), p.dur);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0, 0);
+    g.gain.linearRampToValueAtTime(p.gain == null ? 0.6 : p.gain, p.atk == null ? 0.01 : p.atk);
+    g.gain.exponentialRampToValueAtTime(0.0001, p.dur);
+    n.connect(f); f.connect(g); g.connect(o); n.start(0);
+  },
+
+  /* Frequency modulation. Bells, metallic clangs, robotic voices — the
+     timbres a plain oscillator cannot reach. */
+  fm(c, o, p) {
+    const car = c.createOscillator(), mod = c.createOscillator();
+    const mg = c.createGain(), g = c.createGain();
+    car.frequency.value = p.f0;
+    mod.frequency.value = p.f0 * (p.ratio || 2);
+    mg.gain.setValueAtTime(p.f0 * (p.index || 3), 0);
+    mg.gain.exponentialRampToValueAtTime(1, p.dur);
+    g.gain.setValueAtTime(0, 0);
+    g.gain.linearRampToValueAtTime(p.gain == null ? 0.6 : p.gain, 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, p.dur);
+    mod.connect(mg); mg.connect(car.frequency); car.connect(g); g.connect(o);
+    car.start(0); mod.start(0); car.stop(p.dur); mod.stop(p.dur);
+  },
+
+  /* Karplus-Strong: noise into a tuned delay with feedback. A plucked string
+     from about eight lines, which is one of the nicer tricks in audio. */
+  pluck(c, o, p) {
+    const n = c.createBufferSource(), len = Math.ceil(c.sampleRate / p.f0);
+    const buf = c.createBuffer(1, c.sampleRate * p.dur, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    for (let i = len; i < d.length; i++) d[i] = (d[i - len] + d[i - len + 1]) * 0.498 * (p.damp || 1);
+    n.buffer = buf;
+    const g = c.createGain();
+    g.gain.setValueAtTime(p.gain == null ? 0.7 : p.gain, 0);
+    g.gain.exponentialRampToValueAtTime(0.0001, p.dur);
+    n.connect(g); g.connect(o); n.start(0);
+  },
+
+  /* Several notes at once. Stings, fanfares, chimes. */
+  chord(c, o, p) {
+    p.freqs.forEach((f, i) => {
+      const osc = c.createOscillator(), g = c.createGain();
+      osc.type = p.wave || 'triangle';
+      osc.frequency.value = f;
+      const t = (p.spread || 0) * i;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime((p.gain == null ? 0.5 : p.gain) / p.freqs.length * 2, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, p.dur);
+      osc.connect(g); g.connect(o); osc.start(t); osc.stop(p.dur);
+    });
+  },
+
+  /* A sequence of notes — the ta-da, the error buzz, the level-up run. */
+  seq(c, o, p) {
+    p.notes.forEach((f, i) => {
+      const t = i * p.gap;
+      const osc = c.createOscillator(), g = c.createGain();
+      osc.type = p.wave || 'square';
+      osc.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(p.gain == null ? 0.45 : p.gain, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + (p.len || p.gap * 0.9));
+      osc.connect(g); g.connect(o); osc.start(t); osc.stop(t + (p.len || p.gap));
+    });
+  },
+
+  /* Body plus crack: a low sine thump under a noise burst. Every impact,
+     door slam, punch and explosion in the library is this. */
+  hit(c, o, p) {
+    SFX_GEN.tone(c, o, { f0: p.f0 || 160, f1: p.f1 || 40, dur: p.dur * 0.8, wave: 'sine', gain: 0.85 });
+    SFX_GEN.noise(c, o, { f0: p.nf0 || 2600, f1: p.nf1 || 300, dur: p.dur, q: 0.7,
+      filter: 'lowpass', gain: p.ngain == null ? 0.5 : p.ngain });
+  },
+
+  /* Amplitude modulation on top of a tone — sirens, alarms, phone rings. */
+  warble(c, o, p) {
+    const osc = c.createOscillator(), lfo = c.createOscillator();
+    const lg = c.createGain(), g = c.createGain();
+    osc.type = p.wave || 'sawtooth';
+    osc.frequency.value = p.f0;
+    lfo.frequency.value = p.rate || 6;
+    lg.gain.value = p.depth || 60;
+    lfo.connect(lg); lg.connect(osc.frequency);
+    g.gain.setValueAtTime(0, 0);
+    g.gain.linearRampToValueAtTime(p.gain == null ? 0.5 : p.gain, 0.02);
+    g.gain.setValueAtTime(p.gain == null ? 0.5 : p.gain, p.dur - 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, p.dur);
+    osc.connect(g); g.connect(o); osc.start(0); lfo.start(0);
+    osc.stop(p.dur); lfo.stop(p.dur);
+  },
+
+  /* Two or more recipes layered or offset in time. */
+  stack(c, o, p) {
+    p.parts.forEach(part => {
+      const delayed = c.createGain();
+      delayed.connect(o);
+      /* An OfflineAudioContext has no clock to wait on, so an offset is
+         written into the recipe's own start times rather than scheduled. */
+      SFX_GEN[part.kind](c, delayed, part);
+    });
+  }
+};
+
+/* ---- the library ----
+   Named in plain English, and chosen for what a creator actually reaches for
+   while cutting a video. Nothing here is a joke, a catchphrase or a clip of
+   anybody: the whole board is safe to put in front of a thirteen-year-old,
+   which was the point of building it this way. */
+const SFX_LIB = [
+  // --- interface -----------------------------------------------------------
+  ['Click', 'ui', 'tone', { f0: 1800, f1: 900, dur: 0.05, wave: 'square', gain: 0.35 }],
+  ['Soft click', 'ui', 'tone', { f0: 1200, f1: 800, dur: 0.06, wave: 'sine', gain: 0.3 }],
+  ['Tap', 'ui', 'noise', { f0: 4000, f1: 1500, dur: 0.05, q: 2, gain: 0.35 }],
+  ['Tick', 'ui', 'tone', { f0: 2600, f1: 2600, dur: 0.02, wave: 'square', gain: 0.3 }],
+  ['Pop', 'ui', 'tone', { f0: 420, f1: 1400, dur: 0.09, wave: 'sine', gain: 0.6 }],
+  ['Bubble pop', 'ui', 'tone', { f0: 700, f1: 2200, dur: 0.11, wave: 'sine', gain: 0.5 }],
+  ['Toggle on', 'ui', 'seq', { notes: [660, 990], gap: 0.06, wave: 'sine', gain: 0.4 }],
+  ['Toggle off', 'ui', 'seq', { notes: [990, 660], gap: 0.06, wave: 'sine', gain: 0.4 }],
+  ['Type key', 'ui', 'noise', { f0: 3000, f1: 900, dur: 0.035, q: 1.5, gain: 0.3 }],
+  ['Swipe', 'ui', 'noise', { f0: 700, f1: 4500, dur: 0.22, q: 1.2, gain: 0.35 }],
+  ['Menu open', 'ui', 'tone', { f0: 500, f1: 1500, dur: 0.18, wave: 'triangle', gain: 0.4 }],
+  ['Menu close', 'ui', 'tone', { f0: 1500, f1: 500, dur: 0.18, wave: 'triangle', gain: 0.4 }],
+
+  // --- notifications -------------------------------------------------------
+  ['Notification', 'alert', 'seq', { notes: [880, 1320], gap: 0.11, wave: 'sine', gain: 0.5 }],
+  ['Message', 'alert', 'seq', { notes: [1046, 1568], gap: 0.09, wave: 'triangle', gain: 0.5 }],
+  ['New follower', 'alert', 'seq', { notes: [784, 988, 1319], gap: 0.09, wave: 'triangle', gain: 0.45 }],
+  ['Success', 'alert', 'seq', { notes: [523, 659, 784, 1047], gap: 0.085, wave: 'triangle', gain: 0.45 }],
+  ['Error', 'alert', 'seq', { notes: [330, 247], gap: 0.14, len: 0.2, wave: 'sawtooth', gain: 0.4 }],
+  ['Wrong answer', 'alert', 'tone', { f0: 200, f1: 90, dur: 0.5, wave: 'sawtooth', gain: 0.45 }],
+  ['Correct answer', 'alert', 'seq', { notes: [659, 880], gap: 0.1, wave: 'sine', gain: 0.5 }],
+  ['Alarm', 'alert', 'warble', { f0: 700, rate: 9, depth: 240, dur: 1.1, gain: 0.35 }],
+  ['Siren', 'alert', 'warble', { f0: 620, rate: 0.9, depth: 320, dur: 2.0, gain: 0.3 }],
+  ['Phone ring', 'alert', 'warble', { f0: 480, rate: 22, depth: 120, dur: 0.8, gain: 0.35 }],
+  ['Doorbell', 'alert', 'seq', { notes: [659, 523], gap: 0.35, len: 0.5, wave: 'sine', gain: 0.5 }],
+  ['Countdown beep', 'alert', 'tone', { f0: 900, f1: 900, dur: 0.12, wave: 'square', gain: 0.4 }],
+  ['Timer done', 'alert', 'seq', { notes: [1047, 1047, 1047], gap: 0.16, len: 0.12, wave: 'square', gain: 0.4 }],
+
+  // --- transitions ---------------------------------------------------------
+  ['Whoosh', 'transition', 'noise', { f0: 300, f1: 5000, dur: 0.45, q: 0.9, gain: 0.5 }],
+  ['Reverse whoosh', 'transition', 'noise', { f0: 5000, f1: 300, dur: 0.45, q: 0.9, gain: 0.5 }],
+  ['Fast whoosh', 'transition', 'noise', { f0: 600, f1: 6000, dur: 0.2, q: 1.4, gain: 0.5 }],
+  ['Deep whoosh', 'transition', 'noise', { f0: 120, f1: 1400, dur: 0.7, q: 0.7, gain: 0.55 }],
+  ['Riser', 'transition', 'noise', { f0: 200, f1: 8000, dur: 1.6, q: 1.1, gain: 0.45 }],
+  ['Downlifter', 'transition', 'noise', { f0: 8000, f1: 150, dur: 1.2, q: 1.1, gain: 0.45 }],
+  ['Swoosh up', 'transition', 'tone', { f0: 200, f1: 2400, dur: 0.35, wave: 'sawtooth', gain: 0.35 }],
+  ['Swoosh down', 'transition', 'tone', { f0: 2400, f1: 200, dur: 0.35, wave: 'sawtooth', gain: 0.35 }],
+  ['Tape stop', 'transition', 'tone', { f0: 800, f1: 40, dur: 0.8, wave: 'sawtooth', gain: 0.4 }],
+  ['Rewind', 'transition', 'noise', { f0: 1200, f1: 6000, dur: 0.6, q: 6, gain: 0.35 }],
+  ['Glitch', 'transition', 'noise', { f0: 2000, f1: 400, dur: 0.16, q: 12, gain: 0.5 }],
+  ['Static burst', 'transition', 'noise', { f0: 3000, f1: 3000, dur: 0.3, q: 0.4, filter: 'highpass', gain: 0.4 }],
+
+  // --- impacts -------------------------------------------------------------
+  ['Impact', 'impact', 'hit', { dur: 0.45 }],
+  ['Heavy impact', 'impact', 'hit', { f0: 110, f1: 28, dur: 0.9, nf0: 1600, ngain: 0.6 }],
+  ['Boom', 'impact', 'hit', { f0: 80, f1: 22, dur: 1.4, nf0: 900, nf1: 120, ngain: 0.7 }],
+  ['Explosion', 'impact', 'noise', { f0: 1800, f1: 60, dur: 1.6, q: 0.5, filter: 'lowpass', gain: 0.75 }],
+  ['Punch', 'impact', 'hit', { f0: 190, f1: 50, dur: 0.22, nf0: 3200, ngain: 0.45 }],
+  ['Slap', 'impact', 'noise', { f0: 3500, f1: 800, dur: 0.12, q: 1.2, gain: 0.55 }],
+  ['Thud', 'impact', 'tone', { f0: 130, f1: 45, dur: 0.3, wave: 'sine', gain: 0.8 }],
+  ['Door slam', 'impact', 'hit', { f0: 150, f1: 40, dur: 0.5, nf0: 1200, nf1: 200, ngain: 0.55 }],
+  ['Glass break', 'impact', 'noise', { f0: 6000, f1: 2200, dur: 0.7, q: 2.5, filter: 'highpass', gain: 0.45 }],
+  ['Metal clang', 'impact', 'fm', { f0: 520, ratio: 3.7, index: 6, dur: 1.2, gain: 0.45 }],
+  ['Anvil', 'impact', 'fm', { f0: 880, ratio: 5.1, index: 8, dur: 1.6, gain: 0.4 }],
+  ['Wood knock', 'impact', 'tone', { f0: 900, f1: 300, dur: 0.09, wave: 'triangle', gain: 0.6 }],
+
+  // --- retro / game --------------------------------------------------------
+  ['Coin', 'retro', 'seq', { notes: [988, 1319], gap: 0.07, len: 0.14, wave: 'square', gain: 0.4 }],
+  ['Power up', 'retro', 'seq', { notes: [392, 523, 659, 784, 1047], gap: 0.06, wave: 'square', gain: 0.38 }],
+  ['Power down', 'retro', 'seq', { notes: [1047, 784, 659, 523, 392], gap: 0.06, wave: 'square', gain: 0.38 }],
+  ['Level up', 'retro', 'seq', { notes: [523, 659, 784, 1047, 1319], gap: 0.075, wave: 'square', gain: 0.4 }],
+  ['Game over', 'retro', 'seq', { notes: [392, 370, 349, 330], gap: 0.2, len: 0.3, wave: 'square', gain: 0.4 }],
+  ['Jump', 'retro', 'tone', { f0: 320, f1: 900, dur: 0.14, wave: 'square', gain: 0.4 }],
+  ['Laser', 'retro', 'tone', { f0: 1800, f1: 180, dur: 0.28, wave: 'sawtooth', gain: 0.4 }],
+  ['Zap', 'retro', 'tone', { f0: 2400, f1: 300, dur: 0.16, wave: 'square', gain: 0.4 }],
+  ['Blip', 'retro', 'tone', { f0: 800, f1: 1200, dur: 0.06, wave: 'square', gain: 0.4 }],
+  ['Select', 'retro', 'tone', { f0: 1200, f1: 1600, dur: 0.05, wave: 'square', gain: 0.35 }],
+  ['Hurt', 'retro', 'tone', { f0: 420, f1: 120, dur: 0.22, wave: 'sawtooth', gain: 0.45 }],
+  ['Extra life', 'retro', 'seq', { notes: [1047, 1319, 1568, 2093], gap: 0.08, wave: 'triangle', gain: 0.4 }],
+  ['Teleport', 'retro', 'tone', { f0: 200, f1: 3000, dur: 0.5, wave: 'triangle', gain: 0.35 }],
+  ['Shield', 'retro', 'fm', { f0: 300, ratio: 1.5, index: 4, dur: 0.6, gain: 0.4 }],
+
+  // --- musical -------------------------------------------------------------
+  ['Ta-da', 'musical', 'seq', { notes: [523, 659, 784, 1047], gap: 0.1, len: 0.5, wave: 'triangle', gain: 0.45 }],
+  ['Fanfare', 'musical', 'seq', { notes: [392, 523, 659, 784, 784], gap: 0.13, len: 0.4, wave: 'sawtooth', gain: 0.35 }],
+  ['Chime', 'musical', 'chord', { freqs: [1047, 1568, 2093], dur: 1.6, wave: 'sine', spread: 0.07, gain: 0.4 }],
+  ['Bell', 'musical', 'fm', { f0: 660, ratio: 2.4, index: 5, dur: 2.2, gain: 0.4 }],
+  ['Music box', 'musical', 'seq', { notes: [1047, 1319, 1568, 1319], gap: 0.22, len: 0.5, wave: 'sine', gain: 0.35 }],
+  ['Harp run', 'musical', 'seq', { notes: [523, 587, 659, 784, 880, 1047], gap: 0.055, len: 0.5, wave: 'triangle', gain: 0.3 }],
+  ['Guitar pluck', 'musical', 'pluck', { f0: 220, dur: 1.4, gain: 0.6 }],
+  ['Bass note', 'musical', 'pluck', { f0: 82, dur: 1.2, gain: 0.7 }],
+  ['Major chord', 'musical', 'chord', { freqs: [262, 330, 392], dur: 1.4, wave: 'triangle', gain: 0.45 }],
+  ['Minor chord', 'musical', 'chord', { freqs: [262, 311, 392], dur: 1.4, wave: 'triangle', gain: 0.45 }],
+  ['Suspense sting', 'musical', 'chord', { freqs: [110, 116, 220], dur: 2.2, wave: 'sawtooth', gain: 0.3 }],
+  ['Dramatic sting', 'musical', 'chord', { freqs: [65, 98, 131, 196], dur: 2.4, wave: 'sawtooth', gain: 0.35 }],
+
+  // --- drums ---------------------------------------------------------------
+  ['Kick', 'drums', 'tone', { f0: 150, f1: 40, dur: 0.28, wave: 'sine', gain: 0.9 }],
+  ['Snare', 'drums', 'noise', { f0: 1900, f1: 900, dur: 0.18, q: 0.9, gain: 0.55 }],
+  ['Hi-hat', 'drums', 'noise', { f0: 9000, f1: 7000, dur: 0.06, q: 1.5, filter: 'highpass', gain: 0.35 }],
+  ['Open hat', 'drums', 'noise', { f0: 8000, f1: 6000, dur: 0.3, q: 1.2, filter: 'highpass', gain: 0.32 }],
+  ['Tom', 'drums', 'tone', { f0: 220, f1: 90, dur: 0.35, wave: 'sine', gain: 0.7 }],
+  ['Clap', 'drums', 'noise', { f0: 1500, f1: 1100, dur: 0.14, q: 1.6, gain: 0.5 }],
+  ['Rimshot', 'drums', 'tone', { f0: 1400, f1: 600, dur: 0.06, wave: 'triangle', gain: 0.5 }],
+  ['Cymbal crash', 'drums', 'noise', { f0: 7000, f1: 3000, dur: 1.6, q: 0.6, filter: 'highpass', gain: 0.4 }],
+  ['Drum roll', 'drums', 'seq', { notes: [200, 200, 200, 200, 200, 200, 200, 200], gap: 0.07, len: 0.06, wave: 'triangle', gain: 0.4 }],
+  ['Cowbell', 'drums', 'fm', { f0: 540, ratio: 1.5, index: 2, dur: 0.35, gain: 0.4 }],
+
+  // --- ambience ------------------------------------------------------------
+  ['Wind', 'ambience', 'noise', { f0: 380, f1: 700, dur: 3.0, q: 0.8, filter: 'lowpass', gain: 0.35, atk: 0.6 }],
+  ['Rain', 'ambience', 'noise', { f0: 4000, f1: 4000, dur: 3.0, q: 0.4, filter: 'highpass', gain: 0.28, atk: 0.5 }],
+  ['Thunder', 'ambience', 'noise', { f0: 300, f1: 45, dur: 2.6, q: 0.5, filter: 'lowpass', gain: 0.7 }],
+  ['Ocean wave', 'ambience', 'noise', { f0: 500, f1: 200, dur: 2.6, q: 0.6, filter: 'lowpass', gain: 0.4, atk: 0.8 }],
+  ['Fire crackle', 'ambience', 'noise', { f0: 2200, f1: 1200, dur: 2.0, q: 3, gain: 0.3 }],
+  ['Heartbeat', 'ambience', 'seq', { notes: [60, 50], gap: 0.22, len: 0.18, wave: 'sine', gain: 0.8 }],
+  ['Applause', 'ambience', 'noise', { f0: 2400, f1: 1800, dur: 2.4, q: 0.5, gain: 0.4, atk: 0.25 }],
+  ['Crowd cheer', 'ambience', 'noise', { f0: 1200, f1: 900, dur: 2.6, q: 0.35, gain: 0.42, atk: 0.4 }],
+  ['Camera shutter', 'ambience', 'noise', { f0: 5000, f1: 1200, dur: 0.09, q: 2, gain: 0.5 }],
+  ['Keyboard typing', 'ambience', 'seq', { notes: [2400, 2100, 2600, 2200, 2500], gap: 0.09, len: 0.03, wave: 'square', gain: 0.28 }],
+  ['Page turn', 'ambience', 'noise', { f0: 1800, f1: 5000, dur: 0.3, q: 0.8, gain: 0.3 }],
+  ['Bubble', 'ambience', 'tone', { f0: 300, f1: 1100, dur: 0.16, wave: 'sine', gain: 0.45 }]
+];
+
+const SFX_CATS = [['all', 'Everything'], ['ui', 'Interface'], ['alert', 'Alerts'],
+  ['transition', 'Transitions'], ['impact', 'Impacts'], ['retro', 'Retro & game'],
+  ['musical', 'Musical'], ['drums', 'Drums'], ['ambience', 'Ambience']];
+
+/* An OfflineAudioContext renders faster than real time and hands back samples,
+   which is what makes "play it" and "save it as a WAV" the same code path. */
+function sfxRender(rec) {
+  const dur = Math.max(0.1, (rec[3].dur || 0.4) + 0.25);
+  const rate = 44100;
+  const C = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const c = new C(1, Math.ceil(rate * dur), rate);
+  const master = c.createGain();
+  master.gain.value = 0.9;
+  master.connect(c.destination);
+  SFX_GEN[rec[2]](c, master, rec[3]);
+  return c.startRendering();
+}
+
+/* A 16-bit mono WAV header and the samples. Every editor on every platform
+   opens this, which an Opus blob from MediaRecorder cannot promise. */
+function sfxWav(buf) {
+  const d = buf.getChannelData(0), n = d.length;
+  const ab = new ArrayBuffer(44 + n * 2), v = new DataView(ab);
+  const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVE');
+  str(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, 1, true); v.setUint32(24, buf.sampleRate, true);
+  v.setUint32(28, buf.sampleRate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  str(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) {
+    const s = Math.max(-1, Math.min(1, d[i]));
+    v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+  return new Blob([ab], { type: 'audio/wav' });
+}
+
+IMPL['soundboard'] = {
+  html:
+    '<div class="field"><input id="sfxq" type="search" placeholder="Search 97 effects…" autocomplete="off"></div>' +
+    '<div class="cats" id="sfxcats" style="margin-bottom:14px"></div>' +
+    '<div id="sfxgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));gap:8px;max-height:46vh;overflow-y:auto"></div>' +
+    '<p class="note" id="sfxnote">Press one to hear it. The arrow saves it as a WAV. ' +
+    'Every sound is generated here, in this tab — nothing is downloaded, so the whole board works offline.</p>',
+  wire() {
+    let cat = 'all', term = '';
+    let ctx = null;
+
+    $('sfxcats').innerHTML = SFX_CATS.map(([id, n]) =>
+      '<button class="cat' + (id === 'all' ? ' on' : '') + '" data-s="' + id + '">' + n + '</button>').join('');
+
+    function draw() {
+      const list = SFX_LIB.filter(r =>
+        (cat === 'all' || r[1] === cat) && (!term || r[0].toLowerCase().includes(term)));
+      $('sfxgrid').innerHTML = list.length ? list.map(r =>
+        '<div style="display:flex;gap:4px">' +
+        '<button class="alt sfxplay" data-n="' + esc(r[0]) + '" style="flex:1;text-align:left;padding:10px 12px">' +
+          esc(r[0]) + '</button>' +
+        '<button class="alt sfxsave" data-n="' + esc(r[0]) + '" title="Save as WAV" ' +
+          'aria-label="Save ' + esc(r[0]) + ' as a WAV file" style="padding:10px 12px">↓</button>' +
+        '</div>').join('')
+        : '<p class="note">Nothing matches that.</p>';
+
+      document.querySelectorAll('.sfxplay').forEach(b => b.onclick = () => play(b.dataset.n, b));
+      document.querySelectorAll('.sfxsave').forEach(b => b.onclick = () => save(b.dataset.n));
+    }
+
+    async function play(name, btn) {
+      const rec = SFX_LIB.find(r => r[0] === name);
+      if (!rec) return;
+      /* Created on the first press, because a browser will not let a page make
+         noise until the visitor has asked it to. */
+      if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') await ctx.resume();
+      const buf = await sfxRender(rec);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.connect(ctx.destination); src.start();
+      if (btn) { btn.style.borderColor = 'var(--primary)'; setTimeout(() => btn.style.borderColor = '', 220); }
+    }
+
+    async function save(name) {
+      const rec = SFX_LIB.find(r => r[0] === name);
+      if (!rec) return;
+      const url = URL.createObjectURL(sfxWav(await sfxRender(rec)));
+      dl(url, name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.wav');
+      $('sfxnote').textContent = 'Saved ' + name + '.wav';
+    }
+
+    $('sfxq').oninput = e => { term = e.target.value.trim().toLowerCase(); draw(); };
+    document.querySelectorAll('#sfxcats .cat').forEach(b => b.onclick = () => {
+      cat = b.dataset.s;
+      document.querySelectorAll('#sfxcats .cat').forEach(x => x.classList.toggle('on', x === b));
+      draw();
+    });
+    draw();
+  }
+};
+
+
+/* ===========================================================================
+   REMOVE SOMETHING FROM A PHOTO
+   ===========================================================================
+   Paint over what you want gone; the surrounding texture is grown in over it.
+
+   The algorithm is exemplar-based inpainting, peeled from the outside in: take
+   the pixels on the edge of the hole, find the patch elsewhere in the picture
+   that best matches what is already known around each one, copy its centre,
+   and repeat until the hole is closed. Filling from the edge inward matters —
+   each ring of new pixels becomes context for the next, so texture grows into
+   the hole rather than being blurred across it.
+
+   Being straight about how this compares to a hosted tool: cleanup.pictures
+   and the rest run a trained model on a server, which is better at rebuilding
+   structure — a fence continuing behind what you removed, a face, straight
+   architectural lines. This is classical and it will smear those. What it does
+   as well as any of them is grass, sky, sand, carpet, wood, water, skin and
+   walls, which between them are most of what people actually remove.
+
+   What it does that none of them do: your photograph never leaves this tab.
+   =========================================================================== */
+IMPL['cleanup'] = {
+  html: imgPick() +
+    '<div class="field"><label>Brush size — <b id="cuBs">28</b> px</label>' +
+      '<input id="cuBrush" type="range" min="6" max="90" value="28"></div>' +
+    '<div style="position:relative;display:inline-block;max-width:100%">' +
+      '<canvas id="cuC" style="max-width:100%;border-radius:12px;touch-action:none;cursor:crosshair"></canvas></div>' +
+    '<div class="btns"><button class="go" id="cuGo">Remove it</button>' +
+      '<button class="alt" id="cuClear">Clear the paint</button>' +
+      '<button class="alt" id="cuUndo">Undo</button>' +
+      '<button class="alt" id="cuSave">Save</button></div>' + outBox +
+    '<p class="note">Paint over the thing you want gone. Best on grass, sky, sand, walls and water; ' +
+    'it will smear a fence or a face, because it grows texture rather than understanding what was there. ' +
+    'The picture never leaves this tab.</p>',
+  wire() {
+    const cv = $('cuC'), ctx = cv.getContext('2d', { willReadFrequently: true });
+    let img = null, mask = null, painting = false, history = [];
+    const brush = () => +$('cuBrush').value;
+    $('cuBrush').oninput = () => { $('cuBs').textContent = brush(); };
+
+    onImg(i => {
+      img = i;
+      /* Capped at 1400px on the long edge. The search is O(hole x window) and
+         a 6000px phone photo would take minutes for no visible gain. */
+      const s = Math.min(1, 1400 / Math.max(i.naturalWidth, i.naturalHeight));
+      cv.width = Math.round(i.naturalWidth * s);
+      cv.height = Math.round(i.naturalHeight * s);
+      ctx.drawImage(i, 0, 0, cv.width, cv.height);
+      mask = new Uint8Array(cv.width * cv.height);
+      history = [ctx.getImageData(0, 0, cv.width, cv.height)];
+      setOut('Loaded ' + cv.width + ' × ' + cv.height + '. Paint over what you want removed.');
+    });
+
+    function at(e) {
+      const r = cv.getBoundingClientRect();
+      return [Math.round((e.clientX - r.left) * cv.width / r.width),
+              Math.round((e.clientY - r.top) * cv.height / r.height)];
+    }
+    function paint(x, y) {
+      const rad = brush() / 2;
+      ctx.save();
+      ctx.globalAlpha = 0.55; ctx.fillStyle = '#ff2e97';
+      ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.fill();
+      ctx.restore();
+      for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) {
+        if (dx * dx + dy * dy > rad * rad) continue;
+        const px = x + dx | 0, py = y + dy | 0;
+        if (px < 0 || py < 0 || px >= cv.width || py >= cv.height) continue;
+        mask[py * cv.width + px] = 1;
+      }
+    }
+    cv.addEventListener('pointerdown', e => {
+      if (!img) return;
+      painting = true; cv.setPointerCapture(e.pointerId);
+      const [x, y] = at(e); paint(x, y); e.preventDefault();
+    });
+    cv.addEventListener('pointermove', e => {
+      if (!painting) return;
+      const [x, y] = at(e); paint(x, y); e.preventDefault();
+    });
+    ['pointerup', 'pointercancel'].forEach(t => cv.addEventListener(t, () => { painting = false; }));
+
+    $('cuClear').onclick = () => {
+      if (!history.length) return;
+      ctx.putImageData(history[history.length - 1], 0, 0);
+      mask = new Uint8Array(cv.width * cv.height);
+      setOut('Paint cleared.');
+    };
+    $('cuUndo').onclick = () => {
+      if (history.length < 2) return setOut('Nothing to undo.', true);
+      history.pop();
+      ctx.putImageData(history[history.length - 1], 0, 0);
+      mask = new Uint8Array(cv.width * cv.height);
+      setOut('Undone.');
+    };
+    $('cuSave').onclick = () => {
+      if (!img) return setOut('Open a picture first.', true);
+      cv.toBlob(b => { dl(URL.createObjectURL(b), 'cleaned.png'); setOut('Saved  ·  ' + kb(b.size)); }, 'image/png');
+    };
+
+    $('cuGo').onclick = () => {
+      if (!img) return setOut('Open a picture first.', true);
+      if (!mask.some(v => v)) return setOut('Paint over something first.', true);
+      setOut('Working…');
+      /* Yielded to the browser first so the message actually paints — this is
+         a synchronous pass and it can take a couple of seconds. */
+      setTimeout(() => {
+        const t0 = performance.now();
+        ctx.putImageData(history[history.length - 1], 0, 0);
+        const src = ctx.getImageData(0, 0, cv.width, cv.height);
+        const filled = inpaint(src, mask, cv.width, cv.height);
+        ctx.putImageData(filled, 0, 0);
+        history.push(filled);
+        if (history.length > 6) history.shift();
+        mask = new Uint8Array(cv.width * cv.height);
+        setOut('Done in ' + ((performance.now() - t0) / 1000).toFixed(1) + 's. ' +
+          'Not right? Undo, then paint a little wider — the fill needs texture around it to copy from.');
+      }, 30);
+    };
+
+    /* --- exemplar-based inpainting, filled from the boundary inward --- */
+    function inpaint(image, hole, W, H) {
+      const d = new Uint8ClampedArray(image.data);
+      const unknown = Uint8Array.from(hole);
+      const P = 4;                       // patch half-width: 9x9 window
+      const SEARCH = 90;                 // how far to look for a donor patch
+      const idx = (x, y) => (y * W + x) * 4;
+
+      let remaining = 0;
+      for (let i = 0; i < unknown.length; i++) if (unknown[i]) remaining++;
+
+      let guard = 0;
+      while (remaining > 0 && guard++ < 4000) {
+        /* The boundary: unknown pixels with at least one known neighbour.
+           Filling only these, then recomputing, is the onion peel. */
+        const edge = [];
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+          if (!unknown[y * W + x]) continue;
+          if ((x > 0 && !unknown[y * W + x - 1]) || (x < W - 1 && !unknown[y * W + x + 1]) ||
+              (y > 0 && !unknown[(y - 1) * W + x]) || (y < H - 1 && !unknown[(y + 1) * W + x])) {
+            edge.push([x, y]);
+          }
+        }
+        if (!edge.length) break;
+
+        /* Highest confidence first: the boundary pixel with the most known
+           neighbours has the most context to match against, so it is the one
+           whose guess is most likely to be right. */
+        edge.sort((a, b) => known(b[0], b[1]) - known(a[0], a[1]));
+
+        const wrote = [];
+        for (let e = 0; e < edge.length; e++) {
+          const [x, y] = edge[e];
+          const best = findPatch(x, y);
+          if (best) {
+            const s = idx(best[0], best[1]), t = idx(x, y);
+            d[t] = d[s]; d[t + 1] = d[s + 1]; d[t + 2] = d[s + 2]; d[t + 3] = 255;
+            wrote.push(y * W + x);
+          }
+        }
+        if (!wrote.length) break;
+        wrote.forEach(i => { unknown[i] = 0; remaining--; });
+      }
+
+      /* Anything the search could never place — a hole larger than the search
+         window, or one touching an edge with no texture near it — is closed by
+         averaging its known neighbours so no magenta paint survives. */
+      for (let pass = 0; pass < 40 && remaining > 0; pass++) {
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+          if (!unknown[y * W + x]) continue;
+          let r = 0, g = 0, b = 0, n = 0;
+          for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+            const px = x + dx, py = y + dy;
+            if (px < 0 || py < 0 || px >= W || py >= H || unknown[py * W + px]) continue;
+            const s = idx(px, py); r += d[s]; g += d[s + 1]; b += d[s + 2]; n++;
+          }
+          if (n < 2) continue;
+          const t = idx(x, y);
+          d[t] = r / n; d[t + 1] = g / n; d[t + 2] = b / n; d[t + 3] = 255;
+          unknown[y * W + x] = 0; remaining--;
+        }
+      }
+      return new ImageData(d, W, H);
+
+      function known(x, y) {
+        let n = 0;
+        for (let dy = -P; dy <= P; dy++) for (let dx = -P; dx <= P; dx++) {
+          const px = x + dx, py = y + dy;
+          if (px >= 0 && py >= 0 && px < W && py < H && !unknown[py * W + px]) n++;
+        }
+        return n;
+      }
+
+      /* Sum of squared differences over the known pixels of the patch. The
+           donor must itself be fully known, or the hole copies its own hole. */
+      function findPatch(x, y) {
+        let bx = -1, by = -1, bestErr = Infinity;
+        const x0 = Math.max(P, x - SEARCH), x1 = Math.min(W - P - 1, x + SEARCH);
+        const y0 = Math.max(P, y - SEARCH), y1 = Math.min(H - P - 1, y + SEARCH);
+        const step = (x1 - x0) * (y1 - y0) > 40000 ? 2 : 1;   // thin the search on big windows
+        for (let cy = y0; cy <= y1; cy += step) for (let cx = x0; cx <= x1; cx += step) {
+          if (unknown[cy * W + cx]) continue;
+          let err = 0, n = 0, bad = false;
+          for (let dy = -P; dy <= P && !bad; dy += 2) for (let dx = -P; dx <= P; dx += 2) {
+            const sx = cx + dx, sy = cy + dy, tx = x + dx, ty = y + dy;
+            if (sx < 0 || sy < 0 || sx >= W || sy >= H) { bad = true; break; }
+            if (unknown[sy * W + sx]) { bad = true; break; }
+            if (tx < 0 || ty < 0 || tx >= W || ty >= H || unknown[ty * W + tx]) continue;
+            const a = idx(sx, sy), b = idx(tx, ty);
+            const dr = d[a] - d[b], dg = d[a + 1] - d[b + 1], db = d[a + 2] - d[b + 2];
+            err += dr * dr + dg * dg + db * db; n++;
+            if (err > bestErr * n) { bad = true; break; }        // early out
+          }
+          if (bad || n < 4) continue;
+          const e = err / n;
+          if (e < bestErr) { bestErr = e; bx = cx; by = cy; }
+        }
+        return bx < 0 ? null : [bx, by];
+      }
+    }
+  }
+};
+
+
+/* ===========================================================================
+   ANIMATE A DRAWING
+   ===========================================================================
+   Photograph a character you drew, put a skeleton on it, and it moves.
+
+   This is cut-out animation, the way a paper puppet is made: the drawing is
+   sliced into limbs along the skeleton you place, and each limb rotates about
+   its joint. It is how South Park is animated, and it is the reason this can
+   run in a browser at all — the alternative, which is what the hosted
+   "animate your drawing" tools do, is a pose-estimation model guessing the
+   joints and a mesh deformer bending the artwork, and both need a server.
+
+   The trade is a fair one: you place nine points once, by dragging, and in
+   exchange nothing is uploaded, there is no queue, and it runs offline.
+   =========================================================================== */
+IMPL['animate-drawing'] = {
+  html: imgPick() +
+    '<div style="position:relative;display:inline-block;max-width:100%">' +
+      '<canvas id="adC" style="max-width:100%;border-radius:12px;touch-action:none"></canvas></div>' +
+    '<div class="field"><label>Movement</label><select id="adMove">' +
+      '<option value="wave">Wave</option><option value="walk">Walk</option>' +
+      '<option value="run">Run</option><option value="jump">Jump</option>' +
+      '<option value="dance">Dance</option><option value="idle">Breathe</option></select></div>' +
+    '<div class="btns"><button class="go" id="adPlay">Play</button>' +
+      '<button class="alt" id="adReset">Reset the skeleton</button>' +
+      '<button class="alt" id="adRec">Record a clip</button></div>' + outBox +
+    '<p class="note">Drag the nine dots onto your character &mdash; head, shoulders, hands, hips, feet. ' +
+    'Draw on white paper with a dark pen and it lifts off the page cleanly. Nothing is uploaded.</p>',
+  wire() {
+    const cv = $('adC'), ctx = cv.getContext('2d', { willReadFrequently: true });
+    let img = null, cut = null, playing = false, raf = 0, t0 = 0, drag = -1, rec = null;
+
+    /* Nine joints. Elbows and knees are derived rather than placed: asking for
+       thirteen taps to animate a doodle is how a toy stops being a toy. */
+    const NAMES = ['head', 'neck', 'hip', 'handL', 'handR', 'footL', 'footR', 'shoulderL', 'shoulderR'];
+    let J = {};
+
+    function defaults(w, h) {
+      return {
+        head:      [w * 0.50, h * 0.13], neck: [w * 0.50, h * 0.26], hip: [w * 0.50, h * 0.56],
+        shoulderL: [w * 0.38, h * 0.29], shoulderR: [w * 0.62, h * 0.29],
+        handL:     [w * 0.24, h * 0.52], handR: [w * 0.76, h * 0.52],
+        footL:     [w * 0.40, h * 0.94], footR: [w * 0.60, h * 0.94]
+      };
+    }
+
+    onImg(i => {
+      img = i;
+      const s = Math.min(1, 620 / Math.max(i.naturalWidth, i.naturalHeight));
+      cv.width = Math.round(i.naturalWidth * s);
+      cv.height = Math.round(i.naturalHeight * s);
+      cut = lift(i, cv.width, cv.height);
+      J = defaults(cv.width, cv.height);
+      draw(0);
+      setOut('Drag the dots onto your character, then press Play.');
+    });
+
+    /* --- lift the drawing off the paper ---
+       The page is the most common colour in the border of the photograph, so
+       that is what the background is taken to be. Anything far enough from it
+       is ink and keeps its alpha; the rest is cleared. Cheap, and it copes
+       with a phone photo of a sketchbook under a lamp, which a fixed white
+       threshold does not. */
+    function lift(image, w, h) {
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const x = c.getContext('2d', { willReadFrequently: true });
+      x.drawImage(image, 0, 0, w, h);
+      const im = x.getImageData(0, 0, w, h), d = im.data;
+      let r = 0, g = 0, b = 0, n = 0;
+      const edge = (px, py) => px < 3 || py < 3 || px > w - 4 || py > h - 4;
+      for (let py = 0; py < h; py += 2) for (let px = 0; px < w; px += 2) {
+        if (!edge(px, py)) continue;
+        const i = (py * w + px) * 4; r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+      }
+      r /= n; g /= n; b /= n;
+      for (let i = 0; i < d.length; i += 4) {
+        const dist = Math.hypot(d[i] - r, d[i + 1] - g, d[i + 2] - b);
+        d[i + 3] = dist < 46 ? 0 : Math.min(255, dist * 4);
+      }
+      x.putImageData(im, 0, 0);
+      return c;
+    }
+
+    /* --- the puppet ---
+       Each bone draws the source image clipped to a quad around it, rotated
+       about its parent joint. Drawn far side first so the near arm and leg
+       land on top. */
+    const BONES = [
+      ['neck', 'shoulderR', 0.22], ['shoulderR', 'handR', 0.20],   // far arm
+      ['hip', 'footR', 0.24],                                       // far leg
+      ['neck', 'hip', 0.46],                                        // torso
+      ['head', 'neck', 0.46],                                       // head
+      ['hip', 'footL', 0.24],                                       // near leg
+      ['neck', 'shoulderL', 0.22], ['shoulderL', 'handL', 0.20]     // near arm
+    ];
+
+    const MOVES = {
+      idle:  t => ({ bob: Math.sin(t * 2) * 2, armL: Math.sin(t * 2) * 3, armR: -Math.sin(t * 2) * 3,
+                     legL: 0, legR: 0, lean: 0, head: Math.sin(t * 2) * 2 }),
+      wave:  t => ({ bob: Math.sin(t * 3) * 2, armL: -95 + Math.sin(t * 9) * 26, armR: 6,
+                     legL: 0, legR: 0, lean: 0, head: Math.sin(t * 3) * 4 }),
+      walk:  t => ({ bob: Math.abs(Math.sin(t * 5)) * 5, armL: Math.sin(t * 5) * 30,
+                     armR: -Math.sin(t * 5) * 30, legL: -Math.sin(t * 5) * 26,
+                     legR: Math.sin(t * 5) * 26, lean: 3, head: Math.sin(t * 5) * 3 }),
+      run:   t => ({ bob: Math.abs(Math.sin(t * 9)) * 11, armL: Math.sin(t * 9) * 58,
+                     armR: -Math.sin(t * 9) * 58, legL: -Math.sin(t * 9) * 52,
+                     legR: Math.sin(t * 9) * 52, lean: 13, head: 6 }),
+      jump:  t => { const p = (Math.sin(t * 3.4) + 1) / 2;
+                    return { bob: -p * 46, armL: -p * 100, armR: -p * 100,
+                             legL: -p * 26, legR: p * 26, lean: 0, head: -p * 6 }; },
+      dance: t => ({ bob: Math.abs(Math.sin(t * 6)) * 9, armL: -60 + Math.sin(t * 6) * 46,
+                     armR: -60 - Math.sin(t * 6) * 46, legL: Math.sin(t * 3) * 22,
+                     legR: -Math.sin(t * 3) * 22, lean: Math.sin(t * 3) * 9,
+                     head: Math.sin(t * 6) * 9 })
+    };
+
+    function draw(t) {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      if (!cut) return;
+      const m = playing ? MOVES[$('adMove').value](t) : MOVES.idle(0);
+      const rot = { 'neck>shoulderL': m.armL, 'shoulderL>handL': m.armL * 0.6,
+                    'neck>shoulderR': m.armR, 'shoulderR>handR': m.armR * 0.6,
+                    'hip>footL': m.legL, 'hip>footR': m.legR,
+                    'neck>hip': m.lean * -0.5, 'head>neck': m.head };
+      ctx.save();
+      ctx.translate(0, m.bob);
+      BONES.forEach(([a, b, wide]) => {
+        const A = J[a], B = J[b];
+        if (!A || !B) return;
+        const ang = (rot[a + '>' + b] || 0) * Math.PI / 180;
+        const len = Math.hypot(B[0] - A[0], B[1] - A[1]);
+        const w = Math.max(18, len * wide);
+        const base = Math.atan2(B[1] - A[1], B[0] - A[0]);
+        ctx.save();
+        ctx.translate(A[0], A[1]);
+        ctx.rotate(ang);
+        ctx.translate(-A[0], -A[1]);
+        /* The clip is a capsule around the bone, so limbs overlap slightly at
+           the joints instead of leaving a gap when they swing. */
+        ctx.beginPath();
+        ctx.save();
+        ctx.translate(A[0], A[1]); ctx.rotate(base);
+        ctx.roundRect ? ctx.roundRect(-w * 0.5, -w * 0.55, len + w, w * 1.1, w * 0.5)
+                      : ctx.rect(-w * 0.5, -w * 0.55, len + w, w * 1.1);
+        ctx.restore();
+        ctx.clip();
+        ctx.drawImage(cut, 0, 0);
+        ctx.restore();
+      });
+      ctx.restore();
+      if (!playing) handles();
+    }
+
+    function handles() {
+      NAMES.forEach(n => {
+        const p = J[n]; if (!p) return;
+        ctx.beginPath(); ctx.arc(p[0], p[1], 8, 0, 7);
+        ctx.fillStyle = 'rgba(0,240,255,0.85)'; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = '#061018'; ctx.stroke();
+      });
+    }
+
+    function at(e) {
+      const r = cv.getBoundingClientRect();
+      return [(e.clientX - r.left) * cv.width / r.width, (e.clientY - r.top) * cv.height / r.height];
+    }
+    cv.addEventListener('pointerdown', e => {
+      if (!cut || playing) return;
+      const [x, y] = at(e);
+      let best = -1, bd = 22;
+      NAMES.forEach((n, i) => {
+        const d = Math.hypot(J[n][0] - x, J[n][1] - y);
+        if (d < bd) { bd = d; best = i; }
+      });
+      drag = best;
+      if (best >= 0) { try { cv.setPointerCapture(e.pointerId); } catch (err) {} e.preventDefault(); }
+    });
+    cv.addEventListener('pointermove', e => {
+      if (drag < 0) return;
+      J[NAMES[drag]] = at(e); draw(0); e.preventDefault();
+    });
+    ['pointerup', 'pointercancel'].forEach(t => cv.addEventListener(t, () => { drag = -1; }));
+
+    function loop(now) {
+      if (!playing) return;
+      if (!t0) t0 = now;
+      draw((now - t0) / 1000);
+      raf = requestAnimationFrame(loop);
+    }
+
+    $('adPlay').onclick = () => {
+      if (!cut) return setOut('Open a picture of your drawing first.', true);
+      playing = !playing;
+      $('adPlay').textContent = playing ? 'Stop' : 'Play';
+      if (playing) { t0 = 0; raf = requestAnimationFrame(loop); setOut('Playing. Stop to move the joints again.'); }
+      else { cancelAnimationFrame(raf); draw(0); setOut('Stopped.'); }
+    };
+    $('adReset').onclick = () => {
+      if (!cut) return;
+      J = defaults(cv.width, cv.height); playing = false;
+      $('adPlay').textContent = 'Play'; cancelAnimationFrame(raf); draw(0);
+    };
+
+    $('adRec').onclick = () => {
+      if (!cut) return setOut('Open a picture of your drawing first.', true);
+      if (rec) { rec.stop(); return; }
+      if (!cv.captureStream || typeof MediaRecorder === 'undefined')
+        return setOut('This browser cannot record a canvas. Chrome, Edge and Firefox can.', true);
+      const type = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+        .find(t => MediaRecorder.isTypeSupported(t));
+      if (!type) return setOut('This browser has no video encoder available.', true);
+      const chunks = [];
+      rec = new MediaRecorder(cv.captureStream(30), { mimeType: type, videoBitsPerSecond: 4000000 });
+      rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+      rec.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        dl(URL.createObjectURL(blob), 'animation.webm');
+        setOut('Saved animation.webm  ·  ' + kb(blob.size));
+        rec = null; $('adRec').textContent = 'Record a clip';
+        playing = false; $('adPlay').textContent = 'Play'; cancelAnimationFrame(raf); draw(0);
+      };
+      if (!playing) { playing = true; t0 = 0; raf = requestAnimationFrame(loop); $('adPlay').textContent = 'Stop'; }
+      rec.start();
+      $('adRec').textContent = 'Stop recording';
+      setOut('Recording… it stops on its own after six seconds.');
+      setTimeout(() => { if (rec) rec.stop(); }, 6000);
+    };
+  }
+};
+
+
 
 /* ============================================================================
    THE GENERATED CATALOGUE
@@ -1640,7 +2472,7 @@ const UNIT_TABLES = {
 
   /* --- one card per social placement, cropping to fill --- */
   SOCIAL_SIZES.forEach(([name, w, h, plat]) => add(
-    { id: 'sz-' + slug(name), cat: 'social', name: 'Resize: ' + name,
+    { id: 'sz-' + slug(name), cat: 'social', plat: plat, fam: 'size', name: 'Resize: ' + name,
       desc: 'Crop and export at exactly ' + w + ' × ' + h + '. Never leaves your device.' },
     { html: imgPick() +
         '<div class="btns"><button class="go" id="go">Make it ' + w + ' × ' + h + '</button></div>' + outBox +
@@ -1666,7 +2498,7 @@ const UNIT_TABLES = {
 
   /* --- one live counter per platform field, with that field's real cap --- */
   SOCIAL_LIMITS.forEach(([name, max, plat, note]) => add(
-    { id: 'lim-' + slug(name), cat: 'social', name: name + ' counter',
+    { id: 'lim-' + slug(name), cat: 'social', plat: plat, fam: 'limit', name: name + ' counter',
       desc: 'Live count against the real ' + max.toLocaleString() + '-character cap.' },
     { html: ta('t', 'Type or paste…') + '<div id="bar"></div>' +
         (note ? '<p class="note">' + note + '</p>' : ''),
@@ -1685,7 +2517,7 @@ const UNIT_TABLES = {
 
   /* --- one calculator per formula --- */
   SOCIAL_CALC.forEach(([name, desc, labels, fn]) => add(
-    { id: 'calc-' + slug(name), cat: 'social', name: name, desc: desc },
+    { id: 'calc-' + slug(name), cat: 'social', fam: 'calc', name: name, desc: desc },
     { html: '<div class="row2">' + labels.map((l, i) => l ?
         '<div class="field"><label>' + l + '</label><input id="i' + i + '" type="number" step="any"></div>' : '').join('') +
         '</div><div class="stats" id="st"></div>',
@@ -1706,7 +2538,7 @@ const UNIT_TABLES = {
 
   /* --- one text utility per transform --- */
   SOCIAL_TEXT.forEach(([name, desc, fn]) => add(
-    { id: 'tx-' + slug(name), cat: 'social', name: name, desc: desc },
+    { id: 'tx-' + slug(name), cat: 'social', fam: 'text', name: name, desc: desc },
     { html: ta('t', 'Paste your caption, script or list…') + goRow + outBox,
       wire() {
         const run = () => { try { setOut(fn($('t').value)); } catch (e) { setOut('That input broke it: ' + e.message, true); } };
@@ -1719,6 +2551,7 @@ const UNIT_TABLES = {
     units.forEach(from => units.forEach(to => {
       if (from === to) return;
       add({ id: 'u-' + slug(kind + '-' + from + '-' + to), cat: 'converters',
+            kind: kind, from: from, to: to,
             name: from + ' to ' + to, desc: kind + '. Type a number, get the answer.' },
           { html: '<div class="field"><label>' + from + '</label><input id="v" type="number" step="any" value="1"></div>' + outBox,
             wire() {
@@ -1734,6 +2567,84 @@ const UNIT_TABLES = {
     }));
   });
 })();
+
+/* ---------------------------------------------------------------------------
+   ORDERING
+   ============================================================================
+   Converters holds 343 unit pairs and social holds 109 tools. Left in
+   declaration order, browsing either one means scrolling past every length
+   pair before reaching "MB to GB", because Data is the sixth table in the file.
+
+   So every tool gets a rank and the catalogue is sorted by it. Lower is more
+   useful, and the four rules below are tried in order:
+
+     1. HEAD          an explicit shortlist, in the order it is written
+     2. hand-written  keeps the order it was declared in
+     3. social        cross-platform maths and text first, then by platform
+     4. unit pairs    by how everyday both units are, then by table
+
+   These weights are a judgement about what people reach for, not a
+   measurement — there is no usage data yet. They are all in this one block so
+   that a better guess is a one-line change rather than a reshuffle of the file.
+   ============================================================================ */
+
+/* The shortlist. Deliberately mixed across categories, because it also decides
+   what the All tab opens on. */
+const HEAD = [
+  'word-counter', 'soundboard', 'cleanup', 'animate-drawing', 'sz-youtube-thumbnail', 'img-compress', 'password', 'json-formatter',
+  'case-converter', 'lim-youtube-title', 'img-resize', 'percentage', 'base64',
+  'tx-hashtag-extractor', 'sz-instagram-story', 'color', 'find-replace', 'hash',
+  'calc-engagement-rate-by-reach', 'img-convert', 'timestamp', 'text-cleaner', 'url-encode',
+  'sz-tiktok-video-cover', 'lim-instagram-caption', 'ratio', 'slug', 'age',
+  'tx-hashtag-formatter', 'sz-instagram-square-post', 'sort-lines', 'jwt', 'lim-x-post',
+  'chapters', 'utm', 'uuid', 'regex', 'sz-youtube-banner',
+  'lim-youtube-description', 'calc-sponsor-rate-card', 'favicon', 'markdown', 'csv-json',
+  'sz-instagram-reel-cover', 'tx-thread-splitter', 'palette', 'filesize', 'cpm',
+  'lim-tiktok-caption', 'safearea', 'stats', 'html-entities', 'units'
+];
+
+/* Which platforms a creator is most likely to be sizing an image for. */
+const PLATFORM = ['youtube', 'instagram', 'tiktok', 'x', 'facebook', 'linkedin',
+  'pinterest', 'threads', 'reddit', 'twitch', 'snapchat', 'discord',
+  'spotify', 'podcast', 'seo', 'web'];
+
+/* How everyday each unit is: 0 is one people use daily, 4 is one they meet once
+   a year. A pair is scored by the sum of its two units, and that sum outranks
+   which table it came from — otherwise all 72 length pairs land ahead of "kg to
+   lb", and "nautical mile to yard" is on screen while "MB to GB" is not.
+   Sorting by the pair instead fills the first 120 cards with the conversions
+   every table is actually asked for, and UNIT_KIND only breaks the ties. */
+const UNIT_KIND = ['Length', 'Weight', 'Data', 'Time', 'Volume', 'Speed', 'Area', 'Energy'];
+const UNIT_POP = {
+  m: 0, km: 0, cm: 0, mile: 0, foot: 0, inch: 0, mm: 2, yard: 2, 'nautical mile': 4,
+  kg: 0, lb: 0, g: 1, oz: 1, tonne: 3, stone: 3, mg: 4,
+  MB: 0, GB: 0, KB: 1, TB: 2, byte: 3, MiB: 4, GiB: 4,
+  second: 0, minute: 0, hour: 0, day: 0, week: 1, month: 1, year: 1,
+  litre: 0, ml: 0, gallon: 0, pint: 1, cup: 1, 'fl oz': 1, quart: 3, 'cubic metre': 4,
+  'km/h': 0, mph: 0, 'm/s': 2, knot: 3,
+  'sq metre': 0, 'sq foot': 0, acre: 1, hectare: 1, 'sq km': 2, 'sq yard': 3, 'sq mile': 3,
+  kcal: 0, calorie: 0, kWh: 1, kJ: 1, joule: 2, 'watt hour': 2
+};
+
+(function orderCatalogue() {
+  const pop = u => (u in UNIT_POP ? UNIT_POP[u] : 5);
+  const idx = (list, v) => { const i = list.indexOf(v); return i < 0 ? list.length : i; };
+
+  TOOLS.forEach(t => {
+    const h = HEAD.indexOf(t.id);
+    if (h > -1)              t.rank = h - HEAD.length;   // always ahead of the rest
+    else if (t.kind)         t.rank = 60 + (pop(t.from) + pop(t.to)) * 10 + idx(UNIT_KIND, t.kind);
+    else if (t.fam === 'calc') t.rank = 10;
+    else if (t.fam === 'text') t.rank = 20;
+    else if (t.plat)         t.rank = 30 + idx(PLATFORM, t.plat) * 2 + (t.fam === 'size' ? 0 : 1);
+    else                     t.rank = 0;                 // hand-written: leave it be
+  });
+
+  /* Array#sort is stable, so everything sharing a rank keeps the order it was
+     written in — which is the order these tables were reasoned about. */
+  TOOLS.sort((a, b) => a.rank - b.rank);
+})();
+
 
 render();
 
