@@ -250,44 +250,443 @@ footer { border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparen
   display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
 footer a { color: var(--muted-foreground); text-decoration: none; }
 footer a:hover { color: var(--foreground); }
+
+/* ============================================================================
+   THE LANDING PAGE
+   ============================================================================
+   Animation without a framework. The brief asked for Framer Motion, but every
+   effect in it — scroll reveal, stagger, parallax, mouse glow, magnetic
+   buttons, counters, tilt, marquee — is CSS transforms driven by an
+   IntersectionObserver and a pointermove handler. That is about 120 lines here
+   against ~90KB of library, and it keeps the site one pasteable file with no
+   build step, which is the whole delivery model.
+
+   Everything respects prefers-reduced-motion, because a page this animated is
+   genuinely unpleasant for people who asked for less of it.
+   ============================================================================ */
+#progress { position: fixed; top: 0; left: 0; height: 2px; width: 0; z-index: 60;
+  background: var(--gradient-brand); box-shadow: 0 0 12px var(--glow); }
+
+.nav { transition: padding .3s ease; }
+.nav.shrunk { padding-top: 6px; padding-bottom: 6px; }
+.nav.shrunk .navin { padding: 5px 12px; box-shadow: var(--shadow-glow); }
+.navlink { position: relative; }
+.navlink::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 3px; height: 1.5px;
+  background: var(--gradient-brand); transform: scaleX(0); transform-origin: left; transition: transform .28s; }
+.navlink:hover::after, .navlink.active::after { transform: scaleX(1); }
+.cta { border: 0; border-radius: 12px; padding: 8px 16px; font: inherit; font-size: 13.5px;
+  font-weight: 500; cursor: pointer; background: var(--gradient-brand); color: var(--primary-foreground);
+  will-change: transform; transition: box-shadow .25s; text-decoration: none; display: inline-block; }
+.cta:hover { box-shadow: var(--shadow-glow); }
+.ghost { border-radius: 12px; padding: 8px 16px; font: inherit; font-size: 13.5px; font-weight: 500;
+  cursor: pointer; text-decoration: none; color: var(--foreground);
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--secondary) 40%, transparent); transition: .2s; }
+.ghost:hover { background: color-mix(in oklab, var(--secondary) 80%, transparent); }
+.burger { display: grid; }
+@media (min-width: 1024px) { .burger { display: none; } }
+@media (max-width: 1023px) { .navright .cta { display: none; } }
+#mobile { position: fixed; inset: 62px 12px auto; z-index: 49; border-radius: calc(var(--radius) + 4px);
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--card) 92%, transparent); backdrop-filter: blur(18px);
+  padding: 10px; box-shadow: var(--shadow-glow); display: none;
+  opacity: 0; transform: translateY(-10px) scale(.98); transition: opacity .25s, transform .25s; }
+#mobile.open { display: block; opacity: 1; transform: none; }
+#mobile button { display: block; width: 100%; text-align: left; border: 0; background: none;
+  color: var(--foreground); font: inherit; font-size: 14.5px; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+#mobile button:hover { background: color-mix(in oklab, var(--secondary) 60%, transparent); }
+
+/* ---- reveal ---- */
+.rv { opacity: 0; transform: translateY(22px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
+.rv.l { transform: translateX(-26px); } .rv.r { transform: translateX(26px); }
+.rv.s { transform: scale(.94); } .rv.b { filter: blur(10px); }
+.rv.in { opacity: 1; transform: none; filter: none; }
+
+/* ---- hero ---- */
+.hero { position: relative; padding: 128px 0 26px; }
+#glow { position: fixed; width: 520px; height: 520px; border-radius: 9999px; pointer-events: none; z-index: -5;
+  background: radial-gradient(circle, color-mix(in oklab, var(--primary) 18%, transparent), transparent 62%);
+  transform: translate(-50%,-50%); opacity: 0; transition: opacity .5s; mix-blend-mode: screen; }
+h1 .ch { display: inline-block; opacity: 0; transform: translateY(24px) rotateX(-60deg);
+  animation: chIn .62s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes chIn { to { opacity: 1; transform: none; } }
+.heroctas { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 30px 0 26px; }
+.cta.big, .ghost.big { padding: 13px 26px; font-size: 15px; border-radius: 14px; }
+.trust { display: flex; gap: 18px; flex-wrap: wrap; color: var(--muted-foreground); font-size: 12.5px; }
+.trust span { display: inline-flex; align-items: center; gap: 6px; }
+.tick { color: var(--accent); }
+.counts { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 14px; margin-top: 40px; }
+.count { border-radius: calc(var(--radius) + 4px); padding: 18px;
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--card) 55%, transparent); }
+.count b { display: block; font-size: 30px; font-weight: 600; letter-spacing: -.03em;
+  background: var(--gradient-brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.count span { font-size: 12.5px; color: var(--muted-foreground); }
+.floatcards { position: absolute; inset: 100px 0 auto auto; width: 42%; display: none; pointer-events: none; }
+@media (min-width: 1180px) { .floatcards { display: block; } }
+.fc { position: absolute; border-radius: 14px; padding: 12px 14px; font-size: 12.5px;
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--card) 80%, transparent); backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-soft); animation: bob 7s ease-in-out infinite; }
+.fc b { display: block; font-size: 13px; margin-bottom: 2px; }
+.fc span { color: var(--muted-foreground); }
+.fc:nth-child(1) { top: 0; right: 40px; animation-delay: -1s; }
+.fc:nth-child(2) { top: 118px; right: 190px; animation-delay: -3.5s; }
+.fc:nth-child(3) { top: 236px; right: 20px; animation-delay: -5s; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+.scrolldown { display: flex; align-items: center; gap: 8px; color: var(--muted-foreground);
+  font-size: 12px; margin-top: 34px; animation: bob 2.6s ease-in-out infinite; }
+
+/* ---- sections ---- */
+section { padding: 84px 0; position: relative; }
+.eyebrow { font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted-foreground); font-weight: 600; margin-bottom: 12px; display: block; }
+h2 { font-size: clamp(1.8rem,3.4vw,2.6rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.1; }
+.sublede { color: var(--muted-foreground); max-width: 56ch; margin-top: 14px; }
+.cards3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 16px; margin-top: 34px; }
+.fcard { border-radius: calc(var(--radius) + 8px); padding: 22px;
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--card) 55%, transparent);
+  transition: transform .3s, border-color .3s, box-shadow .3s; will-change: transform; }
+.fcard:hover { border-color: color-mix(in oklab, var(--primary) 40%, transparent); box-shadow: var(--shadow-glow); }
+.fcard .ic { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px;
+  font-size: 19px; border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--secondary) 50%, transparent); }
+.fcard b { display: block; margin-top: 16px; font-size: 15.5px; font-weight: 600; letter-spacing: -.015em; }
+.fcard p { margin-top: 7px; font-size: 13.5px; color: var(--muted-foreground); line-height: 1.6; }
+
+/* ---- timeline ---- */
+.steps { margin-top: 40px; position: relative; }
+.steps::before { content: ''; position: absolute; left: 21px; top: 12px; bottom: 12px; width: 2px;
+  background: linear-gradient(to bottom, var(--primary), var(--accent), transparent); opacity: .35; }
+.step { display: flex; gap: 20px; padding: 16px 0; align-items: flex-start; }
+.step .n { position: relative; z-index: 1; flex: 0 0 auto; display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 14px; font-weight: 600; font-size: 15px;
+  background: var(--gradient-brand); color: var(--primary-foreground); box-shadow: var(--shadow-glow); }
+.step b { display: block; font-size: 16px; font-weight: 600; letter-spacing: -.015em; }
+.step p { color: var(--muted-foreground); font-size: 13.5px; margin-top: 5px; line-height: 1.6; max-width: 62ch; }
+
+/* ---- why / list ---- */
+.why { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 12px; margin-top: 30px; }
+.why div { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.why .tick { flex: 0 0 auto; margin-top: 2px; }
+.why span.t { color: var(--muted-foreground); font-size: 13px; display: block; margin-top: 2px; }
+
+/* ---- faq ---- */
+.faq { margin-top: 30px; border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.q { border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.q button { width: 100%; display: flex; justify-content: space-between; gap: 16px; align-items: center;
+  background: none; border: 0; color: inherit; font: inherit; font-size: 15.5px; font-weight: 500;
+  text-align: left; padding: 19px 2px; cursor: pointer; }
+.q .plus { color: var(--muted-foreground); transition: transform .3s; flex: 0 0 auto; }
+.q.open .plus { transform: rotate(45deg); }
+.q .a { max-height: 0; overflow: hidden; transition: max-height .38s cubic-bezier(.22,1,.36,1); }
+.q.open .a { max-height: 320px; }
+.q .a p { color: var(--muted-foreground); font-size: 14px; line-height: 1.7; padding: 0 2px 20px; }
+
+/* ---- final cta ---- */
+.final { border-radius: calc(var(--radius) + 16px); padding: 64px 30px; text-align: center; position: relative;
+  overflow: hidden; border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--card) 55%, transparent); }
+.final::before { content: ''; position: absolute; inset: -40%; background: var(--gradient-brand);
+  opacity: .18; filter: blur(90px); animation: blob-drift 20s ease-in-out infinite; }
+.final > * { position: relative; }
+
+/* ---- footer ---- */
+.foot { border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent); margin-top: 70px; padding: 50px 0 30px; }
+.footcols { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 28px; }
+.footcols h4 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+.footcols a { display: block; color: var(--muted-foreground); text-decoration: none; font-size: 13.5px; padding: 4px 0; }
+.footcols a:hover { color: var(--foreground); }
+.news { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.news input { flex: 1; min-width: 170px; border-radius: 11px; padding: 9px 12px; font: inherit; font-size: 13.5px;
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--secondary) 35%, transparent); color: var(--foreground); outline: none; }
+.footbot { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 38px;
+  padding-top: 22px; border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  color: var(--muted-foreground); font-size: 13px; }
+.social { display: flex; gap: 8px; margin-left: auto; }
+.social a { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent); color: var(--muted-foreground);
+  text-decoration: none; font-size: 13px; }
+.social a:hover { color: var(--foreground); border-color: color-mix(in oklab, var(--primary) 40%, transparent); }
+
+
+/* ---- layout for the landing sections ---- */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.hero .container { position: relative; }
+.foot .brand { display: inline-flex; }
+kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inherit;
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.why div b { display: block; font-size: 14px; font-weight: 600; }
+.rchips { display: flex; gap: 9px; flex-wrap: wrap; justify-content: flex-start; }
+.rchip { border-radius: 9999px; padding: 5px 13px; font-size: 13px; color: var(--muted-foreground);
+  border: 1px dashed color-mix(in oklab, var(--border) 90%, transparent);
+  background: color-mix(in oklab, var(--secondary) 25%, transparent); }
+#stories .sublede { max-width: 62ch; }
+.final h2 { max-width: none; }
+.final .sublede { max-width: 48ch; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rv { opacity: 1 !important; transform: none !important; filter: none !important; }
+  h1 .ch { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .fc, .scrolldown, .final::before { animation: none !important; }
+}
 </style>
 </head>
 <body>
+<div id='progress'></div>
+<div id='glow' aria-hidden='true'></div>
 <div class='aurora' aria-hidden='true'>
   <div class='blob b1'></div><div class='blob b2'></div><div class='blob b3'></div>
   <div class='wash'></div><div class='gridlines'></div>
 </div>
 
-<nav class='nav'>
+<nav class='nav' id='nav'>
   <div class='navin'>
     <a class='brand' href='./'><span class='brandsq'>N</span><span class='brandtx'>NovaTools</span></a>
-    <div class='navlinks' id='navlinks'></div>
+    <div class='navlinks' id='navlinks'>
+      <button class='navlink' data-go='tools'>Tools</button>
+      <button class='navlink' data-go='features'>Features</button>
+      <button class='navlink' data-go='how'>How it works</button>
+      <button class='navlink' data-go='why'>Why NovaTools</button>
+      <button class='navlink' data-go='roadmap'>Roadmap</button>
+      <button class='navlink' data-go='faq'>FAQ</button>
+    </div>
     <div class='navright'>
       <button class='navsearch' id='navsearch'>Search tools <kbd>/</kbd></button>
-      <button class='iconbtn' id='themebtn' aria-label='Switch theme'>◐</button>
+      <button class='iconbtn' id='themebtn' aria-label='Switch theme' title='Switch theme'><svg width='15' height='15' viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='9' fill='none' stroke='currentColor' stroke-width='1.8'/><path d='M12 3a9 9 0 0 0 0 18Z' fill='currentColor'/></svg></button>
+      <button class='cta mag' data-go='tools'>Open the tools</button>
+      <button class='iconbtn burger' id='burger' aria-label='Menu' aria-expanded='false'>&#9776;</button>
     </div>
   </div>
 </nav>
+<div id='mobile'></div>
 
-<div class='wrap'>
-  <span class='pill'><span class='dot'></span> 498 tools · nothing uploads</span>
-  <h1>Every small tool, <span class='g'>in one place</span></h1>
-  <p class='lede'>498 tools that each do one job — 109 of them for social. They run inside your
-    browser, so nothing is uploaded, nothing is stored, and all of it works offline.</p>
+<header class='hero' id='top'>
+  <div class='container'>
+    <div class='floatcards' aria-hidden='true'>
+      <div class='fc'><b>Word counter</b><span>Counts as you type</span></div>
+      <div class='fc'><b>Password generator</b><span>Real entropy, shown in bits</span></div>
+      <div class='fc'><b>Image compressor</b><span>Never leaves the tab</span></div>
+    </div>
 
-  <div class='searchrow'>
-    <input id='q' type='search' placeholder='Search 498 tools…' autocomplete='off'>
+    <span class='pill rv'><span class='dot'></span> <b id='pillN'>498</b>&nbsp;tools &middot; nothing uploads</span>
+    <h1 id='heroH1'>Every small tool, <span class='g'>in one place</span></h1>
+    <p class='lede rv'>Each one does a single job, properly. They run inside your browser, so
+      nothing is uploaded, nothing is stored, and all of it keeps working with the Wi-Fi off.</p>
+
+    <div class='heroctas rv'>
+      <button class='cta big mag' data-go='tools'>Browse the tools</button>
+      <button class='ghost big' data-go='how'>See how it works</button>
+    </div>
+
+    <div class='trust rv'>
+      <span><span class='tick'>&#10003;</span> No sign-up</span>
+      <span><span class='tick'>&#10003;</span> No upload</span>
+      <span><span class='tick'>&#10003;</span> No cookies</span>
+      <span><span class='tick'>&#10003;</span> Works offline</span>
+    </div>
+
+    <div class='counts'>
+      <div class='count rv'><b data-count='498'>0</b><span>Tools, each with real code behind it</span></div>
+      <div class='count rv'><b data-count='109'>0</b><span>Of them built for social</span></div>
+      <div class='count rv'><b data-count='0'>0</b><span>Bytes sent to a server</span></div>
+      <div class='count rv'><b data-count='11'>0</b><span>Categories to narrow it down</span></div>
+    </div>
+
+    <div class='scrolldown' aria-hidden='true'>&#8595; &nbsp;Scroll</div>
   </div>
-  <div class='cats' id='cats'></div>
-  <div class='grid' id='grid'></div>
-  <p class='empty' id='empty' style='display:none'>Nothing matches that.</p>
+</header>
 
-  <footer>
-    <span>© 2026 NovaTools</span>
-    <a href='privacy.html'>Privacy</a>
-    <span style='margin-left:auto'>Runs entirely in your browser</span>
-  </footer>
-</div>
+<section id='tools'>
+  <div class='container'>
+    <span class='eyebrow rv'>The directory</span>
+    <h2 class='rv'>Every tool on the site</h2>
+    <p class='sublede rv'>Start typing, or pick a category. Opening a tool gives it its own
+      address, so you can bookmark the one you keep coming back to.</p>
+
+    <div class='searchrow rv' style='margin-top:28px'>
+      <input id='q' type='search' placeholder='Search 498 tools&hellip;' autocomplete='off'>
+    </div>
+    <div class='cats rv' id='cats'></div>
+    <div class='grid' id='grid'></div>
+    <p class='empty' id='empty' style='display:none'>Nothing matches that.</p>
+  </div>
+</section>
+
+<section id='features'>
+  <div class='container'>
+    <span class='eyebrow rv'>Why it is built this way</span>
+    <h2 class='rv'>The whole thing runs on your machine</h2>
+    <p class='sublede rv'>There is no account system, no upload endpoint and no database,
+      because none of these tools need one.</p>
+
+    <div class='cards3'>
+      <div class='fcard rv tilt'><span class='ic'>&#128274;</span>
+        <b>Nothing is uploaded</b>
+        <p>Your text, images and files are read by JavaScript in the tab you are looking at.
+          There is no server to send them to, so there is nothing to leak.</p></div>
+      <div class='fcard rv tilt'><span class='ic'>&#9992;</span>
+        <b>Works with the Wi-Fi off</b>
+        <p>The page is a single file. Once it has loaded, every tool still runs &mdash;
+          on a plane, on the Tube, on a dead hotel connection.</p></div>
+      <div class='fcard rv tilt'><span class='ic'>&#128279;</span>
+        <b>One address per tool</b>
+        <p>Open a tool and the URL changes to match it. Bookmark it, send it to someone,
+          or pin it &mdash; it opens straight onto that tool.</p></div>
+      <div class='fcard rv tilt'><span class='ic'>&#9889;</span>
+        <b>No round trip</b>
+        <p>Results appear as you type because nothing is waiting on a network request.
+          The slowest part is you finishing the sentence.</p></div>
+      <div class='fcard rv tilt'><span class='ic'>&#128100;</span>
+        <b>No account, no cookies</b>
+        <p>The only thing stored is which colour scheme you picked, and that stays in
+          your browser. Nothing is tracked between visits.</p></div>
+      <div class='fcard rv tilt'><span class='ic'>&#127991;</span>
+        <b>Free, and staying free</b>
+        <p>Running costs are a static file on a CDN, which is close enough to nothing.
+          Ads pay for the domain; the tools do not get a paywall.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id='how'>
+  <div class='container'>
+    <span class='eyebrow rv'>How it works</span>
+    <h2 class='rv'>Four steps, and none of them is &ldquo;create an account&rdquo;</h2>
+
+    <div class='steps'>
+      <div class='step rv l'><span class='n'>1</span>
+        <div><b>Find the tool</b>
+          <p>Type what you want into the search box, or press <kbd>/</kbd> from anywhere on
+            the page. Category chips narrow it down if you would rather browse.</p></div></div>
+      <div class='step rv l'><span class='n'>2</span>
+        <div><b>Open it</b>
+          <p>The tool opens in a panel over the page and the address bar updates, so the
+            back button and the bookmark both do what you expect.</p></div></div>
+      <div class='step rv l'><span class='n'>3</span>
+        <div><b>Paste, drop or type</b>
+          <p>Text tools work as you type. Image tools take a file from your machine and
+            read it locally &mdash; the file never moves.</p></div></div>
+      <div class='step rv l'><span class='n'>4</span>
+        <div><b>Copy or download</b>
+          <p>Copy the result to the clipboard, or save the file. Close the tab and there is
+            no trace of what you did.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id='why'>
+  <div class='container'>
+    <span class='eyebrow rv'>The honest version</span>
+    <h2 class='rv'>What NovaTools is, and what it is not</h2>
+    <p class='sublede rv'>Most &ldquo;500 free tools&rdquo; sites are one text box behind five
+      hundred headings. Here is what is actually true about this one.</p>
+
+    <div class='why'>
+      <div class='rv'><span class='tick'>&#10003;</span><div><b>498 tools with distinct code</b>
+        <span class='t'>Each has its own inputs and its own logic. None of them is a shared box under a new title.</span></div></div>
+      <div class='rv'><span class='tick'>&#10003;</span><div><b>109 of them are for social</b>
+        <span class='t'>Exact canvas sizes, real character limits, and the maths behind engagement and reach.</span></div></div>
+      <div class='rv'><span class='tick'>&#10003;</span><div><b>Sizes and limits come from tables</b>
+        <span class='t'>Placement dimensions and caption limits are data, so correcting one is a one-line change.</span></div></div>
+      <div class='rv'><span class='tick'>&#10003;</span><div><b>It is one HTML file</b>
+        <span class='t'>No build step, no framework, no dependency that can go unmaintained and take the site with it.</span></div></div>
+      <div class='rv'><span class='tick'>&#10003;</span><div><b>Light and dark, both real</b>
+        <span class='t'>The palette follows your system until you choose, and then it remembers the choice.</span></div></div>
+      <div class='rv'><span class='tick'>&#10003;</span><div><b>The AI tools are marked as AI</b>
+        <span class='t'>A handful hand off to the NovaClip assistant, which does have a server. Those carry an <em>assistant</em> label so you know which is which.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id='roadmap'>
+  <div class='container'>
+    <span class='eyebrow rv'>Not built yet</span>
+    <h2 class='rv'>The things that need a server</h2>
+    <p class='sublede rv'>These are on the list, and none of them exists on the site today.
+      They need a model API and a backend to pay for it, which is the opposite of everything
+      above. They are here so the plan is visible &mdash; not so the tool count looks bigger.</p>
+    <div class='cats rv' id='roadmapchips' style='margin-top:26px'></div>
+  </div>
+</section>
+
+<section id='stories'>
+  <div class='container'>
+    <span class='eyebrow rv'>Reviews</span>
+    <h2 class='rv'>There are no testimonials here yet</h2>
+    <p class='sublede rv'>The site launched with nobody using it. Quotes from people who do not
+      exist, next to logos of companies that never opened it, would be the easiest thing on this
+      page to write and the only dishonest thing on it. When someone real has something to say,
+      it goes here.</p>
+    <div class='heroctas rv'>
+      <a class='ghost big' href='mailto:eskondori.pt@gmail.com?subject=NovaTools%20feedback'>Send feedback</a>
+    </div>
+  </div>
+</section>
+
+<section id='faq'>
+  <div class='container'>
+    <span class='eyebrow rv'>Questions</span>
+    <h2 class='rv'>The ones worth answering</h2>
+    <div class='faq' id='faqlist'></div>
+  </div>
+</section>
+
+<section id='start'>
+  <div class='container'>
+    <div class='final rv s'>
+      <h2>Pick a tool and get on with it</h2>
+      <p class='sublede' style='margin:14px auto 0'>No sign-up screen, no trial, no card.
+        The search box is three lines up the page.</p>
+      <div class='heroctas' style='justify-content:center'>
+        <button class='cta big mag' data-go='tools'>Browse all <span id='ctaN'>498</span> tools</button>
+        <a class='ghost big' href='privacy.html'>Read the privacy page</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class='foot'>
+  <div class='container'>
+    <div class='footcols'>
+      <div>
+        <a class='brand' href='./' style='margin-bottom:12px'><span class='brandsq'>N</span><span class='brandtx'>NovaTools</span></a>
+        <p style='color:var(--muted-foreground);font-size:13.5px;line-height:1.6;max-width:30ch'>
+          Small tools that run in your browser. Nothing uploads.</p>
+      </div>
+      <div><h4>Popular</h4>
+        <a href='?t=word-counter'>Word counter</a>
+        <a href='?t=password'>Password generator</a>
+        <a href='?t=json-formatter'>JSON formatter</a>
+        <a href='?t=color'>Colour converter</a>
+        <a href='?t=hash'>Hash generator</a></div>
+      <div><h4>Categories</h4><div id='footcats'></div></div>
+      <div><h4>The site</h4>
+        <a href='#tools' data-go='tools'>All tools</a>
+        <a href='#how' data-go='how'>How it works</a>
+        <a href='#roadmap' data-go='roadmap'>Roadmap</a>
+        <a href='#faq' data-go='faq'>FAQ</a>
+        <a href='privacy.html'>Privacy</a></div>
+      <div><h4>Get in touch</h4>
+        <p style='color:var(--muted-foreground);font-size:13.5px;line-height:1.6'>
+          There is no mailing list yet &mdash; setting one up means a server and a copy of your
+          address, and neither exists. This opens your mail app instead.</p>
+        <div class='news'>
+          <input id='newsmail' type='email' placeholder='you@example.com' autocomplete='email'>
+          <button class='cta' id='newsbtn'>Write to us</button>
+        </div></div>
+    </div>
+    <div class='footbot'>
+      <span>&copy; 2026 NovaTools</span>
+      <span>Runs entirely in your browser</span>
+      <div class='social'>
+        <a href='https://eskondoript-ship-it.github.io/novaclip-site/' title='NovaClip'>N</a>
+      </div>
+    </div>
+  </div>
+</footer>
 
 <div id='sheet'>
   <div class='sbox'>
@@ -453,15 +852,17 @@ function render() {
 }
 $('cats').innerHTML = CATS.map(([id,n]) =>
   '<button class="cat' + (id === 'all' ? ' on' : '') + '" data-c="' + id + '">' + n + '</button>').join('');
-$('navlinks').innerHTML = CATS.slice(0, 7).map(([id,n]) =>
-  '<button class="navlink' + (id === 'all' ? ' on' : '') + '" data-c="' + id + '">' + n + '</button>').join('');
 function pickCat(c) {
   cat = c;
-  document.querySelectorAll('.cat,.navlink').forEach(x => x.classList.toggle('on', x.dataset.c === c));
+  document.querySelectorAll('.cat').forEach(x => x.classList.toggle('on', x.dataset.c === c));
   render();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  goTo('tools');
 }
-document.querySelectorAll('.cat,.navlink').forEach(b => b.onclick = () => pickCat(b.dataset.c));
+document.querySelectorAll('.cat').forEach(b => b.onclick = () => pickCat(b.dataset.c));
+$('footcats').innerHTML = CATS.slice(1).map(([id,n]) =>
+  '<a href="#tools" data-c="' + id + '">' + n + '</a>').join('');
+$('footcats').querySelectorAll('a').forEach(a =>
+  a.onclick = e => { e.preventDefault(); pickCat(a.dataset.c); });
 
 /* Theme: follow the system until someone chooses, then remember the choice —
    the upload shipped both palettes and a toggle, so both are here. */
@@ -1934,6 +2335,255 @@ window.ncSitemap = function (base) {
       '  <url><loc>' + base + '?t=' + t.id + '</loc><lastmod>' + today + '</lastmod><priority>0.7</priority></url>')
       .join('\n') + '\n</urlset>';
 };
+
+
+/* ---- roadmap: named, and clearly marked as not here ---- */
+$('roadmapchips').className = 'rchips rv';
+$('roadmapchips').innerHTML = ['AI writer', 'Blog generator', 'Email writer', 'Paraphraser',
+  'Summariser', 'Image generator', 'Background remover', 'Upscaler', 'Video generator',
+  'Subtitle generator', 'Voice cloning', 'Text to speech', 'Speech to text', 'PDF chat',
+  'Code generator', 'Code explainer', 'SEO writer', 'Ad copy generator', 'Business plan writer']
+  .map(n => '<span class="rchip">' + n + '</span>').join('');
+
+/* ---- FAQ ---- */
+(function () {
+  const QA = [
+    ['Is any of this actually free?',
+     'Yes, all of it. There is no paid tier and no usage cap, because there is no per-use cost to cover — the page is a static file and the work happens on your machine. Ads on the page pay for the domain.'],
+    ['Do you see what I paste in?',
+     'No. There is no server to send it to. Every tool reads its input from the page you have open and writes the result back into it. You can open the network tab and watch nothing happen.'],
+    ['What happens to images I open?',
+     'They are read with the browser’s own file reader and drawn to a canvas in the tab. The file is never transmitted, and closing the tab is the whole cleanup process.'],
+    ['Do I need an account?',
+     'No. There is no sign-up, no login and no session. The only thing kept between visits is whether you chose the light or dark palette, and that lives in your browser.'],
+    ['Does it work offline?',
+     'Once the page has loaded, yes. The tools, their code and the styling are all in the one file, so nothing further is fetched.'],
+    ['Which tools use AI, and how?',
+     'A small number hand off to the NovaClip assistant, which does run on a server. Those are labelled <em>assistant</em> on the card so it is obvious which ones leave the browser.'],
+    ['Why is the tool list capped at 120 on screen?',
+     'Rendering all of them at once is hundreds of shadow layers and a visibly janky scroll on a phone. Search and the category chips reach the rest, which is how anyone finds a tool in a list this long anyway.'],
+    ['Can I link to a single tool?',
+     'Yes — opening one changes the address to match, so the URL in the bar is the link to send.']
+  ];
+  $('faqlist').innerHTML = QA.map(([q, a]) =>
+    '<div class="q rv"><button><span>' + q + '</span><span class="plus">+</span></button>' +
+    '<div class="a"><p>' + a + '</p></div></div>').join('');
+  $('faqlist').querySelectorAll('.q button').forEach(b => b.onclick = () => {
+    const q = b.parentElement;
+    const open = q.classList.contains('open');
+    $('faqlist').querySelectorAll('.q').forEach(x => x.classList.remove('open'));
+    q.classList.toggle('open', !open);
+  });
+})();
+
+/* ---- the newsletter box, which is a mail link and says so ---- */
+$('newsbtn').onclick = () => {
+  const v = $('newsmail').value.trim();
+  location.href = 'mailto:eskondori.pt@gmail.com?subject=NovaTools' +
+    (v ? '&body=' + encodeURIComponent('From: ' + v + '\n\n') : '');
+};
+
+/* ---------------------------------------------------------------------------
+   THE LANDING PAGE
+   Framer Motion's whole vocabulary — scroll reveal, stagger, parallax, mouse
+   glow, magnetic buttons, count-up, tilt — is transforms driven by an
+   IntersectionObserver and two pointer handlers. Doing it here costs about a
+   hundred lines instead of a build step and ~90KB of runtime, and keeps the
+   site the one pasteable file it has to be.
+
+   Every effect below checks prefers-reduced-motion before it starts.
+   --------------------------------------------------------------------------- */
+(function () {
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- smooth navigation ---- */
+  window.goTo = function (id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + scrollY - 76;
+    scrollTo({ top, behavior: still ? 'auto' : 'smooth' });
+  };
+  document.querySelectorAll('[data-go]').forEach(b =>
+    b.onclick = e => { e.preventDefault(); closeMenu(); goTo(b.dataset.go); });
+
+  /* ---- scroll progress + navbar shrink ---- */
+  const bar = $('progress'), nav = $('nav');
+  function onScroll() {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (h > 0 ? (scrollY / h) * 100 : 0) + '%';
+    nav.classList.toggle('shrunk', scrollY > 24);
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---- which section am I in ---- */
+  const links = [...document.querySelectorAll('.navlink')];
+  const secs = links.map(l => document.getElementById(l.dataset.go)).filter(Boolean);
+  if (secs.length) {
+    const seen = new Set();
+    const io = new IntersectionObserver(es => {
+      es.forEach(e => e.isIntersecting ? seen.add(e.target.id) : seen.delete(e.target.id));
+      const here = secs.filter(x => seen.has(x.id)).pop();
+      /* Past the last linked section the band holds only the CTA and the footer.
+         Leaving the previous link lit reads better than clearing the whole bar. */
+      if (here) links.forEach(l => l.classList.toggle('active', l.dataset.go === here.id));
+    }, { rootMargin: '-70px 0px -60% 0px' });
+    secs.forEach(x => io.observe(x));
+  }
+
+  /* ---- mobile menu ---- */
+  const menu = $('mobile'), burger = $('burger');
+  menu.innerHTML = links.map(l =>
+    '<button data-m="' + l.dataset.go + '">' + l.textContent + '</button>').join('');
+  menu.querySelectorAll('button').forEach(b =>
+    b.onclick = () => { closeMenu(); goTo(b.dataset.m); });
+  function closeMenu() { menu.classList.remove('open'); burger.setAttribute('aria-expanded', 'false'); }
+  burger.onclick = () => {
+    const open = menu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', String(open));
+  };
+  addEventListener('click', e => {
+    if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== burger) closeMenu();
+  });
+
+  /* ---- counters: real figures, read off the catalogue ---- */
+  const real = {
+    tools: TOOLS.length,
+    social: TOOLS.filter(t => t.cat === 'social').length,
+    bytes: 0,
+    cats: CATS.length - 1
+  };
+  const counters = [...document.querySelectorAll('.count b')];
+  [real.tools, real.social, real.bytes, real.cats].forEach((v, n) => {
+    if (counters[n]) counters[n].dataset.count = v;
+  });
+  $('pillN').textContent = real.tools;
+  $('ctaN').textContent = real.tools;
+  $('q').placeholder = 'Search ' + real.tools + ' tools…';
+
+  /* ---- reveal on scroll, staggered by position in the group ---- */
+  const groups = new Map();
+  document.querySelectorAll('.rv').forEach(el => {
+    const key = el.parentElement;
+    const n = groups.get(key) || 0;
+    groups.set(key, n + 1);
+    if (!still) el.style.transitionDelay = Math.min(n, 6) * 70 + 'ms';
+  });
+  const pending = new Set(document.querySelectorAll('.rv'));
+  function reveal(el) {
+    if (!pending.has(el)) return;
+    pending.delete(el);
+    rio.unobserve(el);
+    el.classList.add('in');
+    countUp(el);
+  }
+  const rio = new IntersectionObserver(
+    es => es.forEach(e => { if (e.isIntersecting) reveal(e.target); }),
+    { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+  pending.forEach(el => rio.observe(el));
+  /* A fast programmatic scroll can hand the observer a single entry in which the
+     element went in and back out between frames, and it stays hidden for good.
+     This sweeps whatever is left over on the geometry, which is cheap because
+     the set only ever shrinks. */
+  function sweep() {
+    if (!pending.size) return removeEventListener('scroll', sweep);
+    [...pending].forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.top < innerHeight * 0.92) reveal(el);
+    });
+  }
+  addEventListener('scroll', sweep, { passive: true });
+  addEventListener('resize', sweep, { passive: true });
+  sweep();
+
+  /* ---- headline, one character at a time ---- */
+  (function () {
+    const h1 = $('heroH1');
+    let i = 0;
+    (function walk(node) {
+      [...node.childNodes].forEach(n => {
+        /* The gradient span is clipped text. Splitting it into per-character
+           spans with their own opacity gives each one a stacking context, and
+           background-clip:text stops painting through them — the words vanish.
+           So it animates as a single unit instead. */
+        if (n.nodeType === 1 && n.classList.contains('g')) {
+          n.classList.add('ch');
+          if (!still) n.style.animationDelay = (0.18 + i * 0.024) + 's';
+          else n.style.animation = 'none';
+          i += 3;
+          return;
+        }
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          [...n.textContent].forEach(c => {
+            const sp = document.createElement('span');
+            sp.className = 'ch';
+            sp.textContent = c === ' ' ? ' ' : c;
+            if (!still) sp.style.animationDelay = (0.18 + i * 0.024) + 's';
+            else sp.style.animation = 'none';
+            i++;
+            frag.appendChild(sp);
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1) walk(n);
+      });
+    })(h1);
+  })();
+
+  function countUp(host) {
+    const el = host.matches('.count') ? host.querySelector('b') : null;
+    if (!el || el.dataset.done) return;
+    el.dataset.done = '1';
+    const target = +el.dataset.count;
+    if (still || target === 0) { el.textContent = target; return; }
+    const t0 = performance.now(), ms = 1100;
+    (function tick(t) {
+      const k = Math.min(1, (t - t0) / ms);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  if (still) return;
+
+  /* ---- the glow that follows the pointer ---- */
+  const glow = $('glow');
+  addEventListener('pointermove', e => {
+    glow.style.opacity = '1';
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  }, { passive: true });
+
+  /* ---- magnetic buttons ---- */
+  document.querySelectorAll('.mag').forEach(b => {
+    b.addEventListener('pointermove', e => {
+      const r = b.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) * 0.25;
+      const y = (e.clientY - r.top - r.height / 2) * 0.35;
+      b.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    });
+    b.addEventListener('pointerleave', () => { b.style.transform = ''; });
+  });
+
+  /* ---- tilt on the feature cards ---- */
+  document.querySelectorAll('.tilt').forEach(c => {
+    c.addEventListener('pointermove', e => {
+      const r = c.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      c.style.transform = 'perspective(900px) rotateX(' + (-y * 5).toFixed(2) +
+        'deg) rotateY(' + (x * 6).toFixed(2) + 'deg) translateY(-4px)';
+    });
+    c.addEventListener('pointerleave', () => { c.style.transform = ''; });
+  });
+
+  /* ---- parallax on the floating cards ---- */
+  const fcs = [...document.querySelectorAll('.fc')];
+  if (fcs.length) addEventListener('scroll', () => {
+    if (scrollY > innerHeight) return;
+    fcs.forEach((f, n) => { f.style.marginTop = (-scrollY * (0.04 + n * 0.02)).toFixed(1) + 'px'; });
+  }, { passive: true });
+})();
 
 </script>
 </body>
