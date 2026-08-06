@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang='en' data-base='../'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>What the image quality slider actually does when you compress</title>
+<meta name='description' content='What the JPEG and WebP quality setting really controls, why 80 is the sweet spot, and why re-saving is what actually ruins an image.'>
+<link rel='canonical' href='https://REPLACE-ME/blog/what-image-quality-does.html'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+
+<meta property='og:type' content='article'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/blog/what-image-quality-does.html'>
+<meta property='og:title' content='What the image quality slider actually does — NovaTools'>
+<meta property='og:description' content='What the JPEG and WebP quality setting really controls, why 80 is the sweet spot, and why re-saving is what actually ruins an image.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='What the image quality slider actually does — NovaTools'>
+<meta name='twitter:description' content='What the JPEG and WebP quality setting really controls, why 80 is the sweet spot, and why re-saving is what actually ruins an image.'>
+
+<!-- The theme is read before first paint. Doing this from the deferred script
+     instead would show a white flash to anyone who chose dark. -->
+<script>try{var t=localStorage.getItem('nt_theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel='stylesheet' href='../nt.css'>
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "BlogPosting",
+   "headline": "What the image quality slider actually does",
+   "description": "What the JPEG and WebP quality setting really controls, why 80 is the usual sweet spot, why re-encoding compounds damage, and when to use PNG or WebP instead.",
+   "url": "https://REPLACE-ME/blog/what-image-quality-does.html",
+   "datePublished": "2026-08-06",
+   "dateModified": "2026-08-06",
+   "articleSection": "Image",
+   "inLanguage": "en-GB",
+   "isAccessibleForFree": true,
+   "author": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://REPLACE-ME/blog/what-image-quality-does.html"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://REPLACE-ME/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Blog",
+     "item": "https://REPLACE-ME/blog.html"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Image",
+     "item": "https://REPLACE-ME/blog/what-image-quality-does.html"
+    }
+   ]
+  }
+ ]
+}</script>
+</head>
+<body>
+<a class='skip' href='#main'>Skip to content</a>
+<div class='aurora' aria-hidden='true'><div class='blob b1'></div><div class='blob b2'></div><div class='gridlines'></div></div>
+
+<header class='nav' id='ntnav'></header>
+
+<main id='main' class='page'>
+<nav class='crumbs' aria-label='Breadcrumb'><a href='../index.html'>Home</a> &rsaquo; <a href='../blog.html'>Blog</a> &rsaquo; Image</nav>
+
+<article id='article'>
+<span class='eyebrow'>Image</span>
+<h1>What the image quality slider actually does</h1>
+<p class='lede'>Quality 80 is not "80% as good". Understanding what JPEG discards explains why 80 looks fine, 60 is often fine too, and re-saving is what kills an image.</p>
+<div class='postmeta'>
+  <span class='avatar' aria-hidden='true'>N</span>
+  <span>NovaTools</span>
+  <span aria-hidden='true'>&middot;</span>
+  <time datetime='2026-08-06'>6 August 2026</time>
+  <span aria-hidden='true'>&middot;</span>
+  <span id='readtime'>&nbsp;</span>
+  <a class='tag' href='../blog.html#image'>Image</a>
+</div>
+
+<div class='adslot' data-ad='belowHero'></div>
+<div class='toc' id='toc' hidden></div>
+
+<div class='prose'>
+
+<h2>Quality is not a percentage of anything</h2>
+<p>The number in a compression dialog is not &ldquo;keep 80% of the image&rdquo;.
+It is an index into a table of quantisation values &mdash; how aggressively the
+encoder rounds off the fine detail it has decided you will not miss.</p>
+<p>JPEG works by splitting the image into 8&times;8 blocks and describing each as
+a sum of frequency patterns: broad areas of colour are low frequency, sharp edges
+and texture are high frequency. The eye is far more sensitive to the first than
+the second. The quality setting decides how coarsely the high-frequency parts get
+rounded. At high quality they are kept almost exactly; at low quality they are
+rounded so hard that entire patterns become zero, which is where blocky skies and
+haloed text come from.</p>
+<p>This is why the relationship between quality and file size is nothing like
+linear. Dropping 100 to 90 often halves the file and changes nothing you can see.
+Dropping 50 to 40 saves very little and looks noticeably worse.</p>
+
+<h2>Where to set it</h2>
+<div class='tablewrap'><table>
+<thead><tr><th>Quality</th><th>Looks like</th><th>Use for</th></tr></thead>
+<tbody>
+<tr><td>95&ndash;100</td><td>Indistinguishable from the original, very large file</td>
+    <td>Archiving; almost never worth it for the web</td></tr>
+<tr><td>80&ndash;90</td><td>Indistinguishable in normal viewing</td>
+    <td>The default for anything that matters</td></tr>
+<tr><td>65&ndash;80</td><td>Slight softening in fine texture</td>
+    <td>Photographs on a page, thumbnails</td></tr>
+<tr><td>50&ndash;65</td><td>Visible artefacts around edges and in flat gradients</td>
+    <td>When a hard size ceiling forces it</td></tr>
+<tr><td>Below 50</td><td>Obvious blocking and colour banding</td>
+    <td>Almost nothing</td></tr>
+</tbody></table></div>
+<p>Start at 80 and go down only if a file size ceiling makes you. The
+<a href='../index.html?t=img-compress'>image compressor</a> shows the resulting
+file size as you move the slider, which turns this from a guess into a decision.</p>
+
+<div class='adslot' data-ad='inArticle'></div>
+
+<h2>Re-encoding is the real damage</h2>
+<p>JPEG is lossy, and it is lossy every single time. Open a JPEG, save it again,
+and the encoder quantises an image that has already been quantised. Do that a few
+times and edges acquire visible halos and flat areas go blotchy &mdash; even at
+high quality, because each pass rounds off what the previous pass left behind.</p>
+<p>This matters practically because every platform re-encodes what you upload.
+You cannot stop that, but you control what it starts from. Upload something you
+already compressed to 40&nbsp;KB and the platform compresses that again. Two
+lossy passes compound; one does not.</p>
+<p>So: <strong>always keep the original</strong>, edit from it rather than from an
+export, and compress exactly once, at the end.</p>
+
+<h2>When JPEG is the wrong format</h2>
+<p>JPEG's assumptions are built for photographs &mdash; smooth gradients,
+continuous tone, no hard edges. Give it something else and it fails visibly.</p>
+<ul>
+<li><strong>Screenshots, text, diagrams, line art, logos</strong> &rarr; PNG.
+Sharp black-on-white edges are pure high frequency, exactly what JPEG throws
+away, so text acquires grey fringes. PNG is lossless and usually smaller for
+this kind of image anyway.</li>
+<li><strong>Anything needing transparency</strong> &rarr; PNG or WebP. JPEG has
+no alpha channel; transparency becomes white or black.</li>
+<li><strong>Photographs for the web</strong> &rarr; WebP if you can. At the same
+visual quality it is typically 25&ndash;35% smaller than JPEG, and every current
+browser supports it.</li>
+</ul>
+<p>The <a href='../index.html?t=img-convert'>format converter</a> will move
+between them; it is worth trying the same image both ways and comparing the two
+file sizes rather than assuming.</p>
+
+<h2>Resize before you compress</h2>
+<p>The largest saving available is almost never the quality slider. It is the
+dimensions. A 4000-pixel-wide photograph displayed in a 800-pixel-wide column is
+carrying twenty-five times the pixels it needs, and no quality setting recovers
+that waste. Halving both dimensions quarters the pixel count.</p>
+<p>Order of operations: resize to the size it will actually be shown at, then
+compress. Doing it the other way compresses pixels you are about to discard.</p>
+
+<h2>Why two tools give different results at the same setting</h2>
+<p>Quality 80 is not a standard. Different encoders use different quantisation
+tables, different chroma subsampling defaults and different optimisation passes,
+so quality 80 in one tool is not quality 80 in another. Browser-based tools use
+whatever encoder your browser ships, so the same page can even produce slightly
+different output in Chrome and Safari.</p>
+<p>The practical consequence is to judge by the result rather than by the number.
+Look at the output and the file size; the setting that produced them is an
+implementation detail.</p>
+
+</div>
+</article>
+
+<div class='share' id='share'></div>
+
+<section aria-labelledby='related'>
+  <h2 id='related' style='margin-top:44px;font-size:1.2rem'>Keep reading</h2>
+  <div class='cards'><a class='card' href='json-wont-parse.html'><b>JSON that will not parse: the six things it almost always is</b><p>A parse error names a position, not a cause. Here are the six mistakes behind nearly every one, in the order they are worth checking.</p></a><a class='card' href='build-a-tool-site.html'><b>How this site serves 498 tools from one file</b><p>No framework, no build step, no server. What that buys, what it costs, and the three techniques that make it hold together.</p></a><a class='card' href='youtube-thumbnail-size.html'><b>YouTube thumbnail size: 1280 &times; 720, and what actually gets cropped</b><p>The recommended size is well documented. What nobody tells you is how small that image gets before anyone decides whether to click it.</p></a></div>
+</section>
+
+<div class='adslot' data-ad='betweenSections'></div>
+
+</main>
+
+<div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
+<footer class='foot' id='ntfoot'></footer>
+
+<script src='../nt-config.js'></script>
+<script src='../nt.js' defer></script>
+</body>
+</html>
