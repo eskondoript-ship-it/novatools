@@ -2219,7 +2219,7 @@ const UNIT_TABLES = {
 
   /* --- one card per social placement, cropping to fill --- */
   SOCIAL_SIZES.forEach(([name, w, h, plat]) => add(
-    { id: 'sz-' + slug(name), cat: 'social', name: 'Resize: ' + name,
+    { id: 'sz-' + slug(name), cat: 'social', plat: plat, fam: 'size', name: 'Resize: ' + name,
       desc: 'Crop and export at exactly ' + w + ' × ' + h + '. Never leaves your device.' },
     { html: imgPick() +
         '<div class="btns"><button class="go" id="go">Make it ' + w + ' × ' + h + '</button></div>' + outBox +
@@ -2245,7 +2245,7 @@ const UNIT_TABLES = {
 
   /* --- one live counter per platform field, with that field's real cap --- */
   SOCIAL_LIMITS.forEach(([name, max, plat, note]) => add(
-    { id: 'lim-' + slug(name), cat: 'social', name: name + ' counter',
+    { id: 'lim-' + slug(name), cat: 'social', plat: plat, fam: 'limit', name: name + ' counter',
       desc: 'Live count against the real ' + max.toLocaleString() + '-character cap.' },
     { html: ta('t', 'Type or paste…') + '<div id="bar"></div>' +
         (note ? '<p class="note">' + note + '</p>' : ''),
@@ -2264,7 +2264,7 @@ const UNIT_TABLES = {
 
   /* --- one calculator per formula --- */
   SOCIAL_CALC.forEach(([name, desc, labels, fn]) => add(
-    { id: 'calc-' + slug(name), cat: 'social', name: name, desc: desc },
+    { id: 'calc-' + slug(name), cat: 'social', fam: 'calc', name: name, desc: desc },
     { html: '<div class="row2">' + labels.map((l, i) => l ?
         '<div class="field"><label>' + l + '</label><input id="i' + i + '" type="number" step="any"></div>' : '').join('') +
         '</div><div class="stats" id="st"></div>',
@@ -2285,7 +2285,7 @@ const UNIT_TABLES = {
 
   /* --- one text utility per transform --- */
   SOCIAL_TEXT.forEach(([name, desc, fn]) => add(
-    { id: 'tx-' + slug(name), cat: 'social', name: name, desc: desc },
+    { id: 'tx-' + slug(name), cat: 'social', fam: 'text', name: name, desc: desc },
     { html: ta('t', 'Paste your caption, script or list…') + goRow + outBox,
       wire() {
         const run = () => { try { setOut(fn($('t').value)); } catch (e) { setOut('That input broke it: ' + e.message, true); } };
@@ -2298,6 +2298,7 @@ const UNIT_TABLES = {
     units.forEach(from => units.forEach(to => {
       if (from === to) return;
       add({ id: 'u-' + slug(kind + '-' + from + '-' + to), cat: 'converters',
+            kind: kind, from: from, to: to,
             name: from + ' to ' + to, desc: kind + '. Type a number, get the answer.' },
           { html: '<div class="field"><label>' + from + '</label><input id="v" type="number" step="any" value="1"></div>' + outBox,
             wire() {
@@ -2313,6 +2314,86 @@ const UNIT_TABLES = {
     }));
   });
 })();
+
+
+/* ---------------------------------------------------------------------------
+   ORDERING
+   ============================================================================
+   The grid stops at 120 cards, so in a long category whatever sorts last is
+   reachable only by search. Converters holds 343 unit pairs and social holds
+   109 tools — left in declaration order, "MB to GB" fell off the end of
+   Converters entirely because Data is the sixth table in the file.
+
+   So every tool gets a rank and the catalogue is sorted by it. Lower is more
+   useful, and the four rules below are tried in order:
+
+     1. HEAD          an explicit shortlist, in the order it is written
+     2. hand-written  keeps the order it was declared in
+     3. social        cross-platform maths and text first, then by platform
+     4. unit pairs    by how everyday both units are, then by table
+
+   These weights are a judgement about what people reach for, not a
+   measurement — there is no usage data yet. They are all in this one block so
+   that a better guess is a one-line change rather than a reshuffle of the file.
+   ============================================================================ */
+
+/* The shortlist. Deliberately mixed across categories, because it also decides
+   what the All tab opens on. */
+const HEAD = [
+  'word-counter', 'sz-youtube-thumbnail', 'img-compress', 'password', 'json-formatter',
+  'case-converter', 'lim-youtube-title', 'img-resize', 'percentage', 'base64',
+  'tx-hashtag-extractor', 'sz-instagram-story', 'color', 'find-replace', 'hash',
+  'calc-engagement-rate-by-reach', 'img-convert', 'timestamp', 'text-cleaner', 'url-encode',
+  'sz-tiktok-video-cover', 'lim-instagram-caption', 'ratio', 'slug', 'age',
+  'tx-hashtag-formatter', 'sz-instagram-square-post', 'sort-lines', 'jwt', 'lim-x-post',
+  'chapters', 'utm', 'uuid', 'regex', 'sz-youtube-banner',
+  'lim-youtube-description', 'calc-sponsor-rate-card', 'favicon', 'markdown', 'csv-json',
+  'sz-instagram-reel-cover', 'tx-thread-splitter', 'palette', 'filesize', 'cpm',
+  'lim-tiktok-caption', 'safearea', 'stats', 'html-entities', 'units'
+];
+
+/* Which platforms a creator is most likely to be sizing an image for. */
+const PLATFORM = ['youtube', 'instagram', 'tiktok', 'x', 'facebook', 'linkedin',
+  'pinterest', 'threads', 'reddit', 'twitch', 'snapchat', 'discord',
+  'spotify', 'podcast', 'seo', 'web'];
+
+/* How everyday each unit is: 0 is one people use daily, 4 is one they meet once
+   a year. A pair is scored by the sum of its two units, and that sum outranks
+   which table it came from — otherwise all 72 length pairs land ahead of "kg to
+   lb", and "nautical mile to yard" is on screen while "MB to GB" is not.
+   Sorting by the pair instead fills the first 120 cards with the conversions
+   every table is actually asked for, and UNIT_KIND only breaks the ties. */
+const UNIT_KIND = ['Length', 'Weight', 'Data', 'Time', 'Volume', 'Speed', 'Area', 'Energy'];
+const UNIT_POP = {
+  m: 0, km: 0, cm: 0, mile: 0, foot: 0, inch: 0, mm: 2, yard: 2, 'nautical mile': 4,
+  kg: 0, lb: 0, g: 1, oz: 1, tonne: 3, stone: 3, mg: 4,
+  MB: 0, GB: 0, KB: 1, TB: 2, byte: 3, MiB: 4, GiB: 4,
+  second: 0, minute: 0, hour: 0, day: 0, week: 1, month: 1, year: 1,
+  litre: 0, ml: 0, gallon: 0, pint: 1, cup: 1, 'fl oz': 1, quart: 3, 'cubic metre': 4,
+  'km/h': 0, mph: 0, 'm/s': 2, knot: 3,
+  'sq metre': 0, 'sq foot': 0, acre: 1, hectare: 1, 'sq km': 2, 'sq yard': 3, 'sq mile': 3,
+  kcal: 0, calorie: 0, kWh: 1, kJ: 1, joule: 2, 'watt hour': 2
+};
+
+(function orderCatalogue() {
+  const pop = u => (u in UNIT_POP ? UNIT_POP[u] : 5);
+  const idx = (list, v) => { const i = list.indexOf(v); return i < 0 ? list.length : i; };
+
+  TOOLS.forEach(t => {
+    const h = HEAD.indexOf(t.id);
+    if (h > -1)              t.rank = h - HEAD.length;   // always ahead of the rest
+    else if (t.kind)         t.rank = 60 + (pop(t.from) + pop(t.to)) * 10 + idx(UNIT_KIND, t.kind);
+    else if (t.fam === 'calc') t.rank = 10;
+    else if (t.fam === 'text') t.rank = 20;
+    else if (t.plat)         t.rank = 30 + idx(PLATFORM, t.plat) * 2 + (t.fam === 'size' ? 0 : 1);
+    else                     t.rank = 0;                 // hand-written: leave it be
+  });
+
+  /* Array#sort is stable, so everything sharing a rank keeps the order it was
+     written in — which is the order these tables were reasoned about. */
+  TOOLS.sort((a, b) => a.rank - b.rank);
+})();
+
 
 render();
 
