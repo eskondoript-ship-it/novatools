@@ -1,11 +1,130 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='en' data-nt-app>
 <head>
 <meta charset='UTF-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'>
-<title>NovaTools — 498 free online tools</title>
+<title>NovaTools — 498 free online tools that never upload your files</title>
+<meta name='description' content='498 free browser tools: social image sizes, character counters, converters, formatters and generators. Everything runs on your device — nothing uploads, no account, works offline.'>
 <link rel='canonical' href='https://REPLACE-ME/'>
-<meta name='description' content='Free browser tools for creators: counters, converters, formatters and generators. Nothing uploads, nothing needs an account.'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+<meta name='theme-color' content='#7c5cff'>
+
+<meta property='og:type' content='website'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/'>
+<meta property='og:title' content='NovaTools — 498 free online tools that never upload your files'>
+<meta property='og:description' content='Social image sizes, character counters, converters and formatters. Everything runs in your browser: nothing uploads, no account, works offline.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='NovaTools — 498 free online tools'>
+<meta name='twitter:description' content='Everything runs in your browser. Nothing uploads, no account, works offline.'>
+
+<!-- The one third-party origin the page ever contacts, and only once advertising
+     has been configured. Warming the connection early saves a DNS lookup and a
+     TLS handshake later; it costs nothing if no ad is ever requested. -->
+<link rel='preconnect' href='https://pagead2.googlesyndication.com' crossorigin>
+<link rel='dns-prefetch' href='https://pagead2.googlesyndication.com'>
+
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://REPLACE-ME/#site",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "inLanguage": "en-GB",
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+     "@type": "EntryPoint",
+     "urlTemplate": "https://REPLACE-ME/?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+   }
+  },
+  {
+   "@type": "SoftwareApplication",
+   "name": "NovaTools",
+   "applicationCategory": "UtilitiesApplication",
+   "operatingSystem": "Any modern browser",
+   "url": "https://REPLACE-ME/",
+   "description": "498 single-purpose online tools that run in the browser. Nothing is uploaded and no account is required.",
+   "featureList": "Image resizing for social placements, character counters, unit conversion, text utilities, developer tools, engagement calculators",
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+   },
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   }
+  },
+  {
+   "@type": "FAQPage",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "Is NovaTools free?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, all of it. There is no paid tier and no usage cap, because there is no per-use cost to cover — the page is a static file and the work happens on your machine. Advertising on the page pays for the domain."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Do you see what I paste in?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. There is no server to send it to. Every tool reads its input from the page you have open and writes the result back into it. You can open your browser's network tab and watch nothing happen."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What happens to images I open?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "They are read with the browser's own file reader and drawn to a canvas in the tab. The file is never transmitted, and closing the tab is the whole cleanup process."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Do I need an account?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. There is no sign-up, no login and no session. The only thing kept between visits is whether you chose the light or dark palette, and that lives in your browser."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does NovaTools work offline?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Once the page has loaded, yes. The tools, their code and the styling are all in the one file, so nothing further is fetched."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Which tools use AI, and how?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "None of them run AI on this site, because there is no server here to run one on. Three tools are prompt builders: they assemble a well-formed request and copy it to your clipboard so you can paste it into an assistant you already use."
+     }
+    }
+   ]
+  }
+ ]
+}</script>
 <style>
 /* ============================================================================
    THE LOVABLE DESIGN SYSTEM, WITHOUT THE FRAMEWORK
@@ -427,6 +546,77 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
 .final h2 { max-width: none; }
 .final .sublede { max-width: 48ch; }
 
+/* ---- search suggestions, favourites, trust ----
+   Three additions that all lean on the same idea: the only things worth
+   storing about a visitor are the ones they can see and delete. Favourites and
+   recent searches live in local storage, are listed in the privacy policy, and
+   disappear with the browser's "clear site data". Nothing is counted, ranked
+   or reported anywhere. */
+.searchwrap { position: relative; max-width: 560px; }
+#sugg { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 30; display: none;
+  border-radius: calc(var(--radius) + 2px); overflow: hidden; padding: 5px;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in oklab, var(--card) 97%, transparent);
+  backdrop-filter: blur(14px); box-shadow: var(--shadow-glow); }
+#sugg.show { display: block; }
+#sugg .sh { font-size: 11px; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--muted-foreground); padding: 8px 10px 4px; }
+#sugg button { display: flex; width: 100%; gap: 10px; align-items: baseline; text-align: left;
+  border: 0; background: none; color: var(--foreground); font: inherit; font-size: 14px;
+  padding: 8px 10px; border-radius: 9px; cursor: pointer; }
+#sugg button:hover, #sugg button[aria-selected='true'] {
+  background: color-mix(in oklab, var(--secondary) 75%, transparent); }
+#sugg button small { color: var(--muted-foreground); font-size: 12px; margin-left: auto; }
+.tool .fav { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 9px;
+  display: grid; place-items: center; border: 0; background: none; cursor: pointer; font-size: 15px;
+  color: var(--muted-foreground); opacity: 0; transition: opacity .2s, color .2s; }
+.tool:hover .fav, .tool .fav:focus-visible, .tool .fav.on { opacity: 1; }
+.tool .fav.on { color: oklch(0.78 0.16 75); }
+.tool .fav:hover { background: color-mix(in oklab, var(--secondary) 70%, transparent); }
+.trustrow { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 14px; margin-top: 34px; }
+.trustrow div { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; }
+.trustrow b { display: block; font-size: 14px; }
+.trustrow span.t { color: var(--muted-foreground); display: block; margin-top: 2px; }
+
+/* ---- ad slots ----
+   Ads pay for the domain, so they are here; they are also the fastest way to
+   ruin a tool site, so where they may go is a rule rather than a habit:
+
+     - between sections of the landing page, never inside a tool panel
+     - never in a position that moves something the visitor is aiming at
+     - no space reserved until a slot is known to be live, so a page with no
+       ads has no holes in it and a page with ads does not jump
+
+   Add ?adpreview=1 to the URL to outline the placements without enabling
+   anything. See nt-config.js for how a slot is turned on. */
+.adslot { display: none; margin: 34px auto; text-align: center; max-width: 1200px; }
+.adslot.live { display: block; min-height: 100px; }
+.adslot.preview { display: block; }
+.adslot .adlabel { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted-foreground); margin-bottom: 6px; }
+.adslot .adbox { display: grid; place-items: center; min-height: 110px; border-radius: var(--radius);
+  border: 1px dashed color-mix(in oklab, var(--border) 100%, transparent);
+  background: color-mix(in oklab, var(--secondary) 30%, transparent);
+  color: var(--muted-foreground); font-size: 13px; }
+.ntskip { position: absolute; left: -9999px; top: 0; z-index: 200; padding: 12px 18px;
+  background: var(--card); color: var(--foreground); text-decoration: none;
+  border: 1px solid var(--border); border-radius: 0 0 12px 0; }
+.ntskip:focus { left: 0; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
+#ntconsent { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 120; display: none;
+  border-radius: calc(var(--radius) + 4px); padding: 18px;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in oklab, var(--card) 96%, transparent); backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glow); }
+@media (min-width: 720px) { #ntconsent { left: auto; right: 20px; bottom: 20px; max-width: 420px; } }
+#ntconsent.show { display: block; }
+#ntconsent p { font-size: 14px; color: var(--muted-foreground); }
+#ntconsent p a { color: var(--primary); }
+#ntconsent .row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.formmsg { margin-top: 10px; font-size: 13.5px; color: var(--muted-foreground); }
+.formmsg.ok { color: var(--accent); }
+.formmsg.err { color: oklch(0.62 0.21 25); }
+
 @media (prefers-reduced-motion: reduce) {
   .rv { opacity: 1 !important; transform: none !important; filter: none !important; }
   h1 .ch { opacity: 1 !important; transform: none !important; animation: none !important; }
@@ -435,6 +625,7 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
 </style>
 </head>
 <body>
+<a class='ntskip' href='#tools'>Skip to the tools</a>
 <div id='progress'></div>
 <div id='glow' aria-hidden='true'></div>
 <div class='aurora' aria-hidden='true'>
@@ -452,6 +643,8 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
       <button class='navlink' data-go='why'>Why NovaTools</button>
       <button class='navlink' data-go='roadmap'>Roadmap</button>
       <button class='navlink' data-go='faq'>FAQ</button>
+      <a class='navlink' href='blog.html'>Blog</a>
+      <a class='navlink' href='about.html'>About</a>
     </div>
     <div class='navright'>
       <button class='navsearch' id='navsearch'>Search tools <kbd>/</kbd></button>
@@ -499,6 +692,10 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
   </div>
 </header>
 
+<div class='wrap' style='max-width:1200px;margin:0 auto;padding:0 20px'>
+  <div class='adslot' data-ad='belowHero'></div>
+</div>
+
 <section id='tools'>
   <div class='container'>
     <span class='eyebrow rv'>The directory</span>
@@ -507,11 +704,17 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
       address, so you can bookmark the one you keep coming back to.</p>
 
     <div class='searchrow rv' style='margin-top:28px'>
-      <input id='q' type='search' placeholder='Search 498 tools&hellip;' autocomplete='off'>
+      <div class='searchwrap'>
+        <label class='sr' for='q' style='position:absolute;left:-9999px'>Search the tools</label>
+        <input id='q' type='search' placeholder='Search 498 tools&hellip;' autocomplete='off'
+               role='combobox' aria-expanded='false' aria-controls='sugg' aria-autocomplete='list'>
+        <div id='sugg' role='listbox' aria-label='Tool suggestions'></div>
+      </div>
     </div>
     <div class='cats rv' id='cats'></div>
     <div class='grid' id='grid'></div>
     <p class='empty' id='empty' style='display:none'>Nothing matches that.</p>
+    <div class='adslot' data-ad='inDirectory'></div>
   </div>
 </section>
 
@@ -577,6 +780,8 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
   </div>
 </section>
 
+<div class='container'><div class='adslot' data-ad='betweenSections'></div></div>
+
 <section id='why'>
   <div class='container'>
     <span class='eyebrow rv'>The honest version</span>
@@ -593,10 +798,12 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
         <span class='t'>Placement dimensions and caption limits are data, so correcting one is a one-line change.</span></div></div>
       <div class='rv'><span class='tick'>&#10003;</span><div><b>It is one HTML file</b>
         <span class='t'>No build step, no framework, no dependency that can go unmaintained and take the site with it.</span></div></div>
+      <div class='rv'><span class='tick'>&#10003;</span><div><b>Served over HTTPS, open source</b>
+        <span class='t'>The whole thing is one MIT-licensed file. You can read every line that runs on your machine.</span></div></div>
       <div class='rv'><span class='tick'>&#10003;</span><div><b>Light and dark, both real</b>
         <span class='t'>The palette follows your system until you choose, and then it remembers the choice.</span></div></div>
-      <div class='rv'><span class='tick'>&#10003;</span><div><b>The AI tools are marked as AI</b>
-        <span class='t'>A handful hand off to the NovaClip assistant, which does have a server. Those carry an <em>assistant</em> label so you know which is which.</span></div></div>
+      <div class='rv'><span class='tick'>&#10003;</span><div><b>Nothing on the site calls out</b>
+        <span class='t'>Not even the three AI tools. They build a prompt and copy it to your clipboard; where you paste it is your business.</span></div></div>
     </div>
   </div>
 </section>
@@ -648,42 +855,54 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
   </div>
 </section>
 
+<div class='container'><div class='adslot' data-ad='aboveFooter'></div></div>
+
+<!-- The sticky rail only exists above 1400px, where there is genuinely unused
+     margin. Below that it is removed rather than stacked into the content. -->
+<aside class='adrail' data-ad='sidebar' aria-label='Advertisement'></aside>
+
 <footer class='foot'>
   <div class='container'>
     <div class='footcols'>
       <div>
         <a class='brand' href='./' style='margin-bottom:12px'><span class='brandsq'>N</span><span class='brandtx'>NovaTools</span></a>
         <p style='color:var(--muted-foreground);font-size:13.5px;line-height:1.6;max-width:30ch'>
-          Small tools that run in your browser. Nothing uploads.</p>
+          498 small tools that run in your browser. Nothing uploads, no account,
+          works offline.</p>
+        <form class='news' id='ntnews' novalidate>
+          <label class='sr' for='ntnewsmail' style='position:absolute;left:-9999px'>Email address</label>
+          <input id='ntnewsmail' name='email' type='email' placeholder='you@example.com' autocomplete='email'>
+          <button class='cta' type='submit'>Subscribe</button>
+        </form>
+        <p class='formmsg' id='ntnewsmsg' role='status' aria-live='polite'></p>
       </div>
+      <div><h4>Product</h4>
+        <a href='#tools' data-go='tools'>All tools</a>
+        <a href='#features' data-go='features'>Features</a>
+        <a href='#roadmap' data-go='roadmap'>Roadmap</a>
+        <a href='pricing.html'>Pricing</a>
+        <a href='blog.html'>Blog</a></div>
       <div><h4>Popular</h4>
         <a href='?t=word-counter'>Word counter</a>
         <a href='?t=password'>Password generator</a>
+        <a href='?t=sz-youtube-thumbnail'>YouTube thumbnail size</a>
         <a href='?t=json-formatter'>JSON formatter</a>
-        <a href='?t=color'>Colour converter</a>
-        <a href='?t=hash'>Hash generator</a></div>
+        <a href='?t=img-compress'>Image compressor</a></div>
       <div><h4>Categories</h4><div id='footcats'></div></div>
-      <div><h4>The site</h4>
-        <a href='#tools' data-go='tools'>All tools</a>
-        <a href='#how' data-go='how'>How it works</a>
-        <a href='#roadmap' data-go='roadmap'>Roadmap</a>
-        <a href='#faq' data-go='faq'>FAQ</a>
-        <a href='privacy.html'>Privacy</a></div>
-      <div><h4>Get in touch</h4>
-        <p style='color:var(--muted-foreground);font-size:13.5px;line-height:1.6'>
-          There is no mailing list yet &mdash; setting one up means a server and a copy of your
-          address, and neither exists. This opens your mail app instead.</p>
-        <div class='news'>
-          <input id='newsmail' type='email' placeholder='you@example.com' autocomplete='email'>
-          <button class='cta' id='newsbtn'>Write to us</button>
-        </div></div>
+      <div><h4>Company</h4>
+        <a href='about.html'>About</a>
+        <a href='contact.html'>Contact</a>
+        <a href='blog.html'>Blog</a></div>
+      <div><h4>Legal</h4>
+        <a href='privacy.html'>Privacy Policy</a>
+        <a href='terms.html'>Terms of Service</a>
+        <a href='cookies.html'>Cookie Policy</a>
+        <a href='disclaimer.html'>Disclaimer</a></div>
     </div>
     <div class='footbot'>
       <span>&copy; 2026 NovaTools</span>
       <span>Runs entirely in your browser</span>
-      <div class='social'>
-        <a href='https://eskondoript-ship-it.github.io/novaclip-site/' title='NovaClip'>N</a>
-      </div>
+      <div class='social' id='ntsocial'></div>
     </div>
   </div>
 </footer>
@@ -810,7 +1029,7 @@ const TOOLS = [
   { id:'ai-hook', cat:'ai', name:'First-line hook', ai:true,
     desc:'Openings that stop the scroll, rewritten until one lands.' }
 ];
-const CATS = [['all','All'],['text','Text'],['developer','Developer'],['images','Images'],
+const CATS = [['all','All'],['fav','Favourites'],['text','Text'],['developer','Developer'],['images','Images'],
               ['video','Video'],['generators','Generators'],['converters','Converters'],
               ['math','Maths'],['marketing','Marketing'],['social','Social'],['ai','AI']];
 
@@ -827,7 +1046,7 @@ const CAT_NAME = { text:'Text', developer:'Developer', images:'Images', video:'V
 function render() {
   const term = q.trim().toLowerCase();
   const list = TOOLS.filter(t =>
-    (cat === 'all' || t.cat === cat) &&
+    (cat === 'all' || (cat === 'fav' ? FAV.has(t.id) : t.cat === cat)) &&
     (!term || (t.name + ' ' + t.desc).toLowerCase().includes(term)));
   /* Capped at 120 rendered cards: 498 at once is 498 hover-shadow layers and a
      visibly janky scroll on a phone. Search and the category chips reach the
@@ -835,10 +1054,14 @@ function render() {
   const shown = list.slice(0, 120);
   $('grid').innerHTML = shown.map(t =>
     '<button class="tool" data-id="' + t.id + '">' +
+      '<span class="fav' + (FAV.has(t.id) ? ' on' : '') + '" role="checkbox" tabindex="0" ' +
+        'aria-checked="' + FAV.has(t.id) + '" aria-label="' +
+        (FAV.has(t.id) ? 'Remove ' : 'Add ') + t.name + (FAV.has(t.id) ? ' from' : ' to') +
+        ' favourites">' + (FAV.has(t.id) ? '\u2605' : '\u2606') + '</span>' +
       '<span class="ic">' + (CAT_ICON[t.cat] || '\u2726') + '</span>' +
       '<b>' + t.name + '</b><p>' + t.desc + '</p>' +
       '<span class="chips"><span class="chip">' + (CAT_NAME[t.cat] || t.cat) + '</span>' +
-      '<span class="chip f">' + (t.ai ? 'assistant' : 'in your browser') + '</span></span>' +
+      '<span class="chip f">' + (t.ai ? 'prompt builder' : 'in your browser') + '</span></span>' +
       '<span class="open">Open tool <span class="arr">\u2197</span></span>' +
     '</button>').join('');
   $('empty').style.display = list.length ? 'none' : 'block';
@@ -849,16 +1072,52 @@ function render() {
       ' — keep typing, or pick a category.';
   }
   document.querySelectorAll('.tool').forEach(b => b.onclick = () => open(b.dataset.id));
+  /* The star sits inside the card button, so its click has to stop there or
+     opening the tool and favouriting it become the same gesture. */
+  document.querySelectorAll('.tool .fav').forEach(f => {
+    const hit = e => { e.stopPropagation(); e.preventDefault(); toggleFav(f.closest('.tool').dataset.id); };
+    f.onclick = hit;
+    f.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') hit(e); };
+  });
+  if (cat === 'fav' && !list.length) {
+    $('empty').style.display = 'block';
+    $('empty').textContent = 'No favourites yet — press the star on any card to keep it here.';
+  }
 }
-$('cats').innerHTML = CATS.map(([id,n]) =>
-  '<button class="cat' + (id === 'all' ? ' on' : '') + '" data-c="' + id + '">' + n + '</button>').join('');
+
+/* ---------------------------------------------------------------------------
+   FAVOURITES AND RECENT SEARCHES
+   Both are lists of ids in local storage, both are listed in the privacy
+   policy, and both vanish with "clear site data". Nothing is sent anywhere and
+   nothing is counted: there is no server to count on, so a "most popular"
+   ranking would have to be invented, and the catalogue is ordered by an
+   openly-stated judgement instead.
+   --------------------------------------------------------------------------- */
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const FAV = new Set(store.get('nt_fav', []));
+function toggleFav(id) {
+  FAV.has(id) ? FAV.delete(id) : FAV.add(id);
+  store.set('nt_fav', [...FAV]);
+  renderCats();
+  render();
+}
+function renderCats() {
+  $('cats').innerHTML = CATS
+    .filter(([id]) => id !== 'fav' || FAV.size)
+    .map(([id, n]) => '<button class="cat' + (id === cat ? ' on' : '') + '" data-c="' + id + '">' +
+      n + (id === 'fav' ? ' (' + FAV.size + ')' : '') + '</button>').join('');
+  document.querySelectorAll('.cat').forEach(b => b.onclick = () => pickCat(b.dataset.c));
+}
+renderCats();
 function pickCat(c) {
   cat = c;
   document.querySelectorAll('.cat').forEach(x => x.classList.toggle('on', x.dataset.c === c));
   render();
   goTo('tools');
 }
-document.querySelectorAll('.cat').forEach(b => b.onclick = () => pickCat(b.dataset.c));
 $('footcats').innerHTML = CATS.slice(1).map(([id,n]) =>
   '<a href="#tools" data-c="' + id + '">' + n + '</a>').join('');
 $('footcats').querySelectorAll('a').forEach(a =>
@@ -884,7 +1143,80 @@ addEventListener('keydown', e => {
     e.preventDefault(); $('q').focus();
   }
 });
-$('q').oninput = e => { q = e.target.value; render(); };
+/* ---------------------------------------------------------------------------
+   SEARCH
+   A combobox over the catalogue: type to filter, arrow keys to move, Enter to
+   open, Escape to close. With the box empty it offers what you searched for
+   before. 498 entries is small enough that filtering on every keystroke is
+   imperceptible, so there is no debounce and no index to keep in step.
+   --------------------------------------------------------------------------- */
+(function search() {
+  const box = $('q'), list = $('sugg');
+  let items = [], sel = -1;
+
+  const recent = () => store.get('nt_recent', []);
+  function remember(term) {
+    if (!term || term.length < 2) return;
+    const r = [term, ...recent().filter(x => x !== term)].slice(0, 6);
+    store.set('nt_recent', r);
+  }
+
+  function draw() {
+    const term = box.value.trim().toLowerCase();
+    if (!term) {
+      const r = recent();
+      items = [];
+      list.innerHTML = r.length
+        ? '<div class="sh">Recent searches</div>' + r.map(x =>
+            '<button type="button" role="option" data-term="' + x.replace(/"/g, '&quot;') + '">' +
+            x + '</button>').join('')
+        : '';
+      list.classList.toggle('show', !!r.length);
+    } else {
+      items = TOOLS.filter(t => t.name.toLowerCase().includes(term)).slice(0, 7);
+      list.innerHTML = items.length
+        ? '<div class="sh">Tools</div>' + items.map((t, i) =>
+            '<button type="button" role="option" data-id="' + t.id + '" aria-selected="false">' +
+            t.name + '<small>' + (CAT_NAME[t.cat] || t.cat) + '</small></button>').join('')
+        : '';
+      list.classList.toggle('show', !!items.length);
+    }
+    sel = -1;
+    box.setAttribute('aria-expanded', list.classList.contains('show'));
+    [...list.querySelectorAll('button')].forEach(btn => {
+      btn.onmousedown = e => {                       // mousedown beats the blur
+        e.preventDefault();
+        if (btn.dataset.id) { remember(box.value.trim()); openFromSearch(btn.dataset.id); }
+        else { box.value = btn.dataset.term; q = box.value; render(); draw(); }
+      };
+    });
+  }
+
+  function openFromSearch(id) { close(); list.classList.remove('show'); open(id); }
+
+  function move(d) {
+    const btns = [...list.querySelectorAll('button[data-id]')];
+    if (!btns.length) return;
+    sel = (sel + d + btns.length) % btns.length;
+    btns.forEach((b, i) => b.setAttribute('aria-selected', i === sel));
+    btns[sel].scrollIntoView({ block: 'nearest' });
+  }
+
+  box.oninput = () => { q = box.value; render(); draw(); };
+  box.onfocus = draw;
+  box.onblur = () => setTimeout(() => list.classList.remove('show'), 120);
+  box.onkeydown = e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); draw.length; move(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+    else if (e.key === 'Escape') { list.classList.remove('show'); box.setAttribute('aria-expanded', 'false'); }
+    else if (e.key === 'Enter') {
+      const btns = [...list.querySelectorAll('button[data-id]')];
+      remember(box.value.trim());
+      if (sel > -1 && btns[sel]) { e.preventDefault(); openFromSearch(btns[sel].dataset.id); }
+      else if (btns.length === 1) { e.preventDefault(); openFromSearch(btns[0].dataset.id); }
+    }
+  };
+})();
 
 /* ---------------------------------------------------------------------------
    THE TOOLS
@@ -2127,20 +2459,19 @@ const AI_PROMPTS = {
 function aiTool(t) {
   return {
     html: ta('t', 'What is the video about?') +
-      '<div class="btns"><button class="go" id="go">Ask the assistant</button></div>' +
-      '<p class="note">This opens the NovaClip assistant with your request. It runs on this site\'s own ' +
-      'backend and already knows your channel, so the answer is about <b>your</b> videos rather than a generic one.</p>',
+      '<div class="btns"><button class="go" id="go">Build the prompt</button></div>' + outBox +
+      '<p class="note">This site has no assistant of its own &mdash; there is no server here to ' +
+      'run one. The button builds the full prompt and copies it to your clipboard so you can paste ' +
+      'it into whichever assistant you already use. This is the only tool on the site that involves ' +
+      'anything outside your browser, and only because you take it there yourself.</p>',
     wire() {
       $('go').onclick = () => {
         const v = $('t').value.trim();
-        if (!v) return;
-        try { navigator.clipboard.writeText(AI_PROMPTS[t.id] + v); } catch (e) {}
-        close();
-        /* Open the widget if it is on the page; otherwise send them to the full
-           AI page rather than silently doing nothing. */
-        const toggle = document.querySelector('#n8n-chat .chat-window-toggle');
-        if (toggle) { toggle.click(); }
-        else location.href = 'ai.html';
+        if (!v) return setOut('Describe the video first.', true);
+        const prompt = AI_PROMPTS[t.id] + v;
+        navigator.clipboard.writeText(prompt).then(
+          () => setOut('Copied. Paste it into your assistant:\n\n' + prompt),
+          () => setOut('Your browser blocked the clipboard. Copy this by hand:\n\n' + prompt));
       };
     }
   };
@@ -2410,11 +2741,16 @@ render();
 window.ncSitemap = function (base) {
   base = base || location.origin + '/';
   const today = new Date().toISOString().slice(0, 10);
+  const url = (loc, pri) => '  <url><loc>' + base + loc + '</loc><lastmod>' + today +
+    '</lastmod><priority>' + pri + '</priority></url>';
+  const pages = ['about.html', 'blog.html', 'pricing.html', 'contact.html',
+                 'privacy.html', 'terms.html', 'cookies.html', 'disclaimer.html'];
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    '  <url><loc>' + base + '</loc><lastmod>' + today + '</lastmod><priority>1.0</priority></url>\n' +
-    TOOLS.filter(t => !t.ai).map(t =>
-      '  <url><loc>' + base + '?t=' + t.id + '</loc><lastmod>' + today + '</lastmod><priority>0.7</priority></url>')
-      .join('\n') + '\n</urlset>';
+    [url('', '1.0')]
+      .concat(pages.map(p => url(p, p === 'blog.html' ? '0.8' : '0.6')))
+      .concat(TOOLS.map(t => url('?t=' + t.id, '0.5')))
+      .join('\n') +
+    '\n</urlset>\n\nBlog posts are files rather than catalogue entries, so add them by hand.';
 };
 
 
@@ -2440,7 +2776,7 @@ $('roadmapchips').innerHTML = ['AI writer', 'Blog generator', 'Email writer', 'P
     ['Does it work offline?',
      'Once the page has loaded, yes. The tools, their code and the styling are all in the one file, so nothing further is fetched.'],
     ['Which tools use AI, and how?',
-     'A small number hand off to the NovaClip assistant, which does run on a server. Those are labelled <em>assistant</em> on the card so it is obvious which ones leave the browser.'],
+     'None of them run AI here — there is no server on this site to run one on. Three tools are prompt builders: they assemble a well-formed request and copy it to your clipboard so you can paste it into whichever assistant you already use. They are labelled <em>prompt builder</em> on the card, and nothing is sent anywhere by them either.'],
     ['Why is the tool list capped at 120 on screen?',
      'Rendering all of them at once is hundreds of shadow layers and a visibly janky scroll on a phone. Search and the category chips reach the rest, which is how anyone finds a tool in a list this long anyway.'],
     ['Can I link to a single tool?',
@@ -2457,12 +2793,9 @@ $('roadmapchips').innerHTML = ['AI writer', 'Blog generator', 'Email writer', 'P
   });
 })();
 
-/* ---- the newsletter box, which is a mail link and says so ---- */
-$('newsbtn').onclick = () => {
-  const v = $('newsmail').value.trim();
-  location.href = 'mailto:eskondori.pt@gmail.com?subject=NovaTools' +
-    (v ? '&body=' + encodeURIComponent('From: ' + v + '\n\n') : '');
-};
+/* The newsletter form in the footer is wired by nt.js, which posts to the
+   endpoint in nt-config.js if there is one and opens a mail client if there is
+   not. It is shared with the content pages so both behave the same way. */
 
 /* ---------------------------------------------------------------------------
    THE LANDING PAGE
@@ -2532,7 +2865,9 @@ $('newsbtn').onclick = () => {
     tools: TOOLS.length,
     social: TOOLS.filter(t => t.cat === 'social').length,
     bytes: 0,
-    cats: CATS.length - 1
+    /* Favourites is a view rather than a category, and it only exists once
+       you have put something in it. */
+    cats: CATS.filter(c => c[0] !== 'all' && c[0] !== 'fav').length
   };
   const counters = [...document.querySelectorAll('.count b')];
   [real.tools, real.social, real.bytes, real.cats].forEach((v, n) => {
@@ -2667,5 +3002,12 @@ $('newsbtn').onclick = () => {
 })();
 
 </script>
+
+<!-- Ads, measurement and the cookie notice live in one shared script so the
+     policy that governs them is in one place rather than copied per page. Both
+     files are optional: if they are missing, every tool above still works and
+     nothing else on the page changes. -->
+<script src='nt-config.js'></script>
+<script src='nt.js' defer></script>
 </body>
 </html>
