@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang='en' data-base='../'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>How to check that a browser tool is not uploading your files</title>
+<meta name='description' content='How in-browser tools work without uploading anything, and the two ways to verify it yourself in about a minute.'>
+<link rel='canonical' href='https://REPLACE-ME/blog/browser-tools-privacy.html'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+
+<meta property='og:type' content='article'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/blog/browser-tools-privacy.html'>
+<meta property='og:title' content='Why browser tools do not upload your files, and how to check in a minute — NovaTools'>
+<meta property='og:description' content='How in-browser tools work without uploading anything, and the two ways to verify it yourself in about a minute.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='Why browser tools do not upload your files, and how to check in a minute — NovaTools'>
+<meta name='twitter:description' content='How in-browser tools work without uploading anything, and the two ways to verify it yourself in about a minute.'>
+
+<!-- The theme is read before first paint. Doing this from the deferred script
+     instead would show a white flash to anyone who chose dark. -->
+<script>try{var t=localStorage.getItem('nt_theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel='stylesheet' href='../nt.css'>
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "BlogPosting",
+   "headline": "Why browser tools do not upload your files, and how to check in a minute",
+   "description": "How in-browser tools work without uploading anything, how to verify it with the Network tab or by going offline, and what a website still sees even when it collects nothing.",
+   "url": "https://REPLACE-ME/blog/browser-tools-privacy.html",
+   "datePublished": "2026-08-06",
+   "dateModified": "2026-08-06",
+   "articleSection": "Productivity",
+   "inLanguage": "en-GB",
+   "isAccessibleForFree": true,
+   "author": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://REPLACE-ME/blog/browser-tools-privacy.html"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://REPLACE-ME/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Blog",
+     "item": "https://REPLACE-ME/blog.html"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Productivity",
+     "item": "https://REPLACE-ME/blog/browser-tools-privacy.html"
+    }
+   ]
+  }
+ ]
+}</script>
+</head>
+<body>
+<a class='skip' href='#main'>Skip to content</a>
+<div class='aurora' aria-hidden='true'><div class='blob b1'></div><div class='blob b2'></div><div class='gridlines'></div></div>
+
+<header class='nav' id='ntnav'></header>
+
+<main id='main' class='page'>
+<nav class='crumbs' aria-label='Breadcrumb'><a href='../index.html'>Home</a> &rsaquo; <a href='../blog.html'>Blog</a> &rsaquo; Productivity</nav>
+
+<article id='article'>
+<span class='eyebrow'>Productivity</span>
+<h1>Why browser tools do not upload your files, and how to check in a minute</h1>
+<p class='lede'>Every free tool site claims your files are safe. Here is what the claim means technically, and the two ways to verify it yourself.</p>
+<div class='postmeta'>
+  <span class='avatar' aria-hidden='true'>N</span>
+  <span>NovaTools</span>
+  <span aria-hidden='true'>&middot;</span>
+  <time datetime='2026-08-06'>6 August 2026</time>
+  <span aria-hidden='true'>&middot;</span>
+  <span id='readtime'>&nbsp;</span>
+  <a class='tag' href='../blog.html#productivity'>Productivity</a>
+</div>
+
+<div class='adslot' data-ad='belowHero'></div>
+<div class='toc' id='toc' hidden></div>
+
+<div class='prose'>
+
+<h2>Two ways to build the same tool</h2>
+<p>Take something simple: resize an image to 1080&nbsp;&times;&nbsp;1080. There
+are two architectures, and they look identical from the outside.</p>
+<p><strong>Server-side.</strong> Your browser uploads the file. A server resizes
+it and sends the result back. Your image existed, however briefly, on a machine
+you do not control &mdash; and it may exist in a request log, a temporary
+directory, a backup or a CDN cache long after you closed the tab.</p>
+<p><strong>Client-side.</strong> The page contains code that can resize images.
+Your browser reads the file from disk, draws it to a canvas, and hands you the
+result. The file never becomes a network request, because there is nothing to
+send it to.</p>
+<p>Both give you a square image. Only one of them ever had your photograph.</p>
+
+<h2>What makes client-side possible</h2>
+<p>Browsers have quietly become capable of most of what these tools need:</p>
+<ul>
+<li><strong>FileReader and object URLs</strong> read a file you choose, without
+uploading it.</li>
+<li><strong>Canvas</strong> decodes, scales, crops and re-encodes images, with a
+quality setting for JPEG and WebP.</li>
+<li><strong>Web Crypto</strong> generates cryptographically strong random values
+and computes SHA hashes natively.</li>
+<li><strong>Intl</strong> formats dates, numbers and currencies for every locale,
+with the timezone database already included.</li>
+</ul>
+<p>None of that needs a server. A password generator that calls an API is not
+just slower and less private &mdash; it is worse, because the password existed
+somewhere else before it reached you.</p>
+
+<div class='adslot' data-ad='inArticle'></div>
+
+<h2>How to check, in about a minute</h2>
+<h3>The Network tab</h3>
+<ol>
+<li>Open the site, then open your browser's developer tools
+(<code>F12</code>, or <code>Cmd</code>+<code>Option</code>+<code>I</code> on a Mac).</li>
+<li>Select the <strong>Network</strong> tab and clear it.</li>
+<li>Now use the tool &mdash; paste your text, choose your file, press the button.</li>
+<li>Watch the list.</li>
+</ol>
+<p>If the tool runs locally, nothing new appears. If something does appear, click
+it and look at the request payload: that is your data, and now you know where it
+went. This works on any site, not just this one, and it is the single most useful
+thing to know how to do about web privacy.</p>
+
+<h3>The offline test</h3>
+<p>Even simpler, and harder to fake. Load the page, turn off your Wi-Fi, and keep
+using it. Tools that run in your browser keep working with no network at all.
+Tools that need a server fail immediately.</p>
+
+<h2>What a website still sees</h2>
+<p>&ldquo;Nothing is uploaded&rdquo; is a precise claim and it is worth being
+precise about what it does not cover. Even a site that collects nothing is served
+by a host, and delivering a page requires knowing where to send it. The host's
+logs will record your IP address, the time, which page you asked for and which
+browser asked. That happens before any of the site's own code runs.</p>
+<p>Beyond that, most sites add things that do collect data:
+advertising, analytics, embedded fonts, chat widgets, comment systems. Each one
+is a third party your browser contacts on the site's behalf. This is why a
+<a href='../cookies.html'>cookie policy</a> that lists the actual services is more
+useful than a privacy page that only makes promises &mdash; you can check the list
+against your own Network tab.</p>
+
+<h2>How to judge any free tool site</h2>
+<ul>
+<li><strong>Does it work offline?</strong> The fastest signal there is.</li>
+<li><strong>Does it insist on an account for something that does not need one?</strong>
+An email address is the product being collected.</li>
+<li><strong>Is there a file size limit?</strong> Limits usually mean uploads,
+because the constraint is bandwidth rather than your own memory.</li>
+<li><strong>Does the privacy policy name specific services,</strong> or does it
+speak in general reassurance? Specifics can be verified.</li>
+<li><strong>Is there a queue or a progress bar for something instant?</strong>
+Local work does not queue.</li>
+</ul>
+<p>None of this requires trusting anybody, which is the point. A claim you can
+check in sixty seconds is worth more than a policy you have to believe.</p>
+
+</div>
+</article>
+
+<div class='share' id='share'></div>
+
+<section aria-labelledby='related'>
+  <h2 id='related' style='margin-top:44px;font-size:1.2rem'>Keep reading</h2>
+  <div class='cards'><a class='card' href='character-limits.html'><b>Character limits, and the ones that truncate without telling you</b><p>Hitting the cap is the visible failure. The expensive one is the cutoff that happens hundreds of characters earlier, in the feed.</p></a><a class='card' href='what-image-quality-does.html'><b>What the image quality slider actually does</b><p>Quality 80 is not "80% as good". Understanding what JPEG discards explains why 80 looks fine, 60 is often fine too, and re-saving is what kills an image.</p></a><a class='card' href='json-wont-parse.html'><b>JSON that will not parse: the six things it almost always is</b><p>A parse error names a position, not a cause. Here are the six mistakes behind nearly every one, in the order they are worth checking.</p></a></div>
+</section>
+
+<div class='adslot' data-ad='betweenSections'></div>
+
+</main>
+
+<div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
+<footer class='foot' id='ntfoot'></footer>
+
+<script src='../nt-config.js'></script>
+<script src='../nt.js' defer></script>
+</body>
+</html>
