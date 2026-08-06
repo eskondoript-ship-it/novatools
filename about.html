@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>About NovaTools — who builds it and how it works</title>
+<meta name='description' content='NovaTools is 498 single-purpose tools that run entirely in your browser. How the site is built, what it will not do, and how it pays for itself.'>
+<link rel='canonical' href='https://REPLACE-ME/about.html'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+
+<meta property='og:type' content='website'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/about.html'>
+<meta property='og:title' content='About NovaTools — who builds it and how it works'>
+<meta property='og:description' content='NovaTools is 498 single-purpose tools that run entirely in your browser. How the site is built, what it will not do, and how it pays for itself.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='About NovaTools — who builds it and how it works'>
+<meta name='twitter:description' content='NovaTools is 498 single-purpose tools that run entirely in your browser. How the site is built, what it will not do, and how it pays for itself.'>
+
+<!-- The theme is read before first paint. Doing this from the deferred script
+     instead would show a white flash to anyone who chose dark. -->
+<script>try{var t=localStorage.getItem('nt_theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel='stylesheet' href='nt.css'>
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "AboutPage",
+   "name": "About NovaTools",
+   "url": "https://REPLACE-ME/about.html",
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "description": "How NovaTools is built and how it is funded."
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://REPLACE-ME/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "About",
+     "item": "https://REPLACE-ME/about.html"
+    }
+   ]
+  }
+ ]
+}</script>
+</head>
+<body>
+<a class='skip' href='#main'>Skip to content</a>
+<div class='aurora' aria-hidden='true'><div class='blob b1'></div><div class='blob b2'></div><div class='gridlines'></div></div>
+
+<header class='nav' id='ntnav'></header>
+
+<main id='main' class='page'>
+<nav class='crumbs' aria-label='Breadcrumb'><a href='index.html'>Home</a> &rsaquo; About</nav>
+
+<span class='eyebrow'>About</span>
+<h1>Small tools that <span class='g'>never see your files</span></h1>
+<p class='lede'>NovaTools is 498 single-purpose tools that run inside your browser.
+No account, no upload, no server doing the work. This page explains what that
+means in practice, how the site is built, and how it pays for itself.</p>
+<div class='adslot' data-ad='belowHero'></div>
+<div class='prose'>
+
+<h2>What it is</h2>
+<p>Most of what people search for online is one small job: count the words in a
+paragraph, work out what 1080&nbsp;&times;&nbsp;1920 crops off a photo, check
+whether a caption is over the limit, turn a timestamp into a date. Each of those
+is a few lines of code. None of them needs an account, a subscription, or a file
+upload.</p>
+<p>NovaTools is 498 of those jobs, each with its own inputs, its own logic and
+its own address. 109 of them are for social media &mdash; exact placement sizes,
+real character caps, and the arithmetic behind engagement and reach.</p>
+
+<h2>What &ldquo;runs in your browser&rdquo; actually means</h2>
+<p>When you open a tool here, your browser downloads a page and then does the
+work itself. There is no request that carries your text or your image anywhere,
+because there is no endpoint to carry it to. The site is a static file on a
+content delivery network; it has no database and no application server.</p>
+<p>You do not have to take that on faith. Open your browser's developer tools,
+switch to the Network tab, and use any tool on the site. You will see the page
+load and then nothing further. If you want to be thorough, load the page, turn
+your Wi-Fi off, and keep using it &mdash; everything still works, because
+everything was already there.</p>
+<div class='note'><b>Including the AI ones</b>
+Three tools are labelled <em>prompt builder</em>. They do not call an AI service
+&mdash; there is no server here to call one from. They assemble a well-formed
+request and copy it to your clipboard, and you decide where to paste it.</div>
+
+<h2>How it is built</h2>
+<p>The whole application is a single HTML file with the styling and the code
+inside it. There is no framework, no build step and no dependency that can go
+unmaintained and take the site down with it. That is not nostalgia; it is what
+makes offline use, instant loading and a truthful privacy policy possible at the
+same time.</p>
+<p>The long tail of tools comes from tables rather than from copy-pasted
+functions. Every social placement size, every character limit, every unit pair
+is a row of data that the page turns into a working tool. When a platform
+changes a size, the fix is one number.</p>
+
+<h2>What it is not</h2>
+<p>There is no image generator, no voice cloner, no video generator and no chat
+assistant built into this site. Those need a model API and a server to pay for
+it, which is the opposite of everything above. They are listed on the
+<a href='index.html#roadmap'>roadmap</a> as things that are not here, rather than
+as cards that open and do nothing.</p>
+<p>There is also no inflated tool count. A catalogue gets to five hundred by
+counting a converter's dropdown options as separate products; this one does not.
+&ldquo;Resize for a YouTube thumbnail&rdquo; and &ldquo;resize for a TikTok&rdquo;
+are two entries because they give two different correct answers. &ldquo;PNG to
+JPG&rdquo; and &ldquo;PNG to WebP&rdquo; are one entry, because they are one tool
+with a dropdown.</p>
+<div class='adslot' data-ad='betweenSections'></div>
+<h2>How it is paid for</h2>
+<p>Hosting a static file costs almost nothing, which is the only reason a site
+like this can be free without a catch. Advertising covers the domain and the
+time. There is no paid tier holding a feature hostage, and the tools do not
+degrade if you block ads &mdash; they are the same code either way.</p>
+<p>If ads are running when you visit, they are clearly labelled and they are
+never placed inside a tool panel. See <a href='pricing.html'>Pricing</a> for the
+full position.</p>
+
+<h2>Who runs it</h2>
+<p>NovaTools is run by an independent developer, not a company with a support
+department. That has one honest downside &mdash; replies take a day or two
+&mdash; and one real upside: a bug report tends to be fixed by the person who
+reads it. <a href='contact.html'>Get in touch</a>.</p>
+
+</div>
+<div class='cards'>
+  <a class='card' href='index.html'><b>Browse the tools &rarr;</b>
+    <p>All 498, searchable, with categories.</p></a>
+  <a class='card' href='blog.html'><b>Read the blog &rarr;</b>
+    <p>Sizes, limits and the reasoning behind them.</p></a>
+  <a class='card' href='privacy.html'><b>Privacy Policy &rarr;</b>
+    <p>The short version of everything on this page.</p></a>
+</div>
+
+</main>
+
+<div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
+<footer class='foot' id='ntfoot'></footer>
+
+<script src='nt-config.js'></script>
+<script src='nt.js' defer></script>
+</body>
+</html>
