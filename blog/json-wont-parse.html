@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang='en' data-base='../'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>JSON will not parse: the six things it almost always is</title>
+<meta name='description' content='Trailing commas, single quotes, unquoted keys, NaN, comments and smart quotes — the six mistakes behind nearly every JSON parse error.'>
+<link rel='canonical' href='https://REPLACE-ME/blog/json-wont-parse.html'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+
+<meta property='og:type' content='article'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/blog/json-wont-parse.html'>
+<meta property='og:title' content='JSON that will not parse: the six things it almost always is — NovaTools'>
+<meta property='og:description' content='Trailing commas, single quotes, unquoted keys, NaN, comments and smart quotes — the six mistakes behind nearly every JSON parse error.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='JSON that will not parse: the six things it almost always is — NovaTools'>
+<meta name='twitter:description' content='Trailing commas, single quotes, unquoted keys, NaN, comments and smart quotes — the six mistakes behind nearly every JSON parse error.'>
+
+<!-- The theme is read before first paint. Doing this from the deferred script
+     instead would show a white flash to anyone who chose dark. -->
+<script>try{var t=localStorage.getItem('nt_theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel='stylesheet' href='../nt.css'>
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "BlogPosting",
+   "headline": "JSON that will not parse: the six things it almost always is",
+   "description": "Why JSON fails to parse: trailing commas, single quotes, unquoted keys, NaN and Infinity, comments, and smart quotes from a word processor.",
+   "url": "https://REPLACE-ME/blog/json-wont-parse.html",
+   "datePublished": "2026-08-06",
+   "dateModified": "2026-08-06",
+   "articleSection": "Coding",
+   "inLanguage": "en-GB",
+   "isAccessibleForFree": true,
+   "author": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://REPLACE-ME/blog/json-wont-parse.html"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://REPLACE-ME/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Blog",
+     "item": "https://REPLACE-ME/blog.html"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Coding",
+     "item": "https://REPLACE-ME/blog/json-wont-parse.html"
+    }
+   ]
+  }
+ ]
+}</script>
+</head>
+<body>
+<a class='skip' href='#main'>Skip to content</a>
+<div class='aurora' aria-hidden='true'><div class='blob b1'></div><div class='blob b2'></div><div class='gridlines'></div></div>
+
+<header class='nav' id='ntnav'></header>
+
+<main id='main' class='page'>
+<nav class='crumbs' aria-label='Breadcrumb'><a href='../index.html'>Home</a> &rsaquo; <a href='../blog.html'>Blog</a> &rsaquo; Coding</nav>
+
+<article id='article'>
+<span class='eyebrow'>Coding</span>
+<h1>JSON that will not parse: the six things it almost always is</h1>
+<p class='lede'>A parse error names a position, not a cause. Here are the six mistakes behind nearly every one, in the order they are worth checking.</p>
+<div class='postmeta'>
+  <span class='avatar' aria-hidden='true'>N</span>
+  <span>NovaTools</span>
+  <span aria-hidden='true'>&middot;</span>
+  <time datetime='2026-08-06'>6 August 2026</time>
+  <span aria-hidden='true'>&middot;</span>
+  <span id='readtime'>&nbsp;</span>
+  <a class='tag' href='../blog.html#coding'>Coding</a>
+</div>
+
+<div class='adslot' data-ad='belowHero'></div>
+<div class='toc' id='toc' hidden></div>
+
+<div class='prose'>
+
+<h2>The error tells you where, not what</h2>
+<p><code>Unexpected token } in JSON at position 247</code> means the parser was
+fine until 247 and then met something it could not use. The mistake is usually
+just before that position, not at it &mdash; a trailing comma at 245 is only
+detected when the brace arrives at 247.</p>
+<p>So read backwards from the position, not forwards. The
+<a href='../index.html?t=json-formatter'>JSON formatter</a> reports the position
+and shows the surrounding text, which is generally enough to spot it
+immediately.</p>
+
+<h2>1. A trailing comma</h2>
+<p>By far the most common, because most programming languages allow it and JSON
+does not.</p>
+<pre><code>{ "a": 1, "b": 2, }        &larr; invalid
+{ "a": 1, "b": 2 }         &larr; valid</code></pre>
+<p>Same rule in arrays. It bites hardest when you delete the last item of a list
+and leave the comma behind on the one above.</p>
+
+<h2>2. Single quotes</h2>
+<p>JSON strings use double quotes. Only double quotes. This is legal JavaScript
+and is not JSON:</p>
+<pre><code>{ 'name': 'Ada' }          &larr; invalid
+{ "name": "Ada" }          &larr; valid</code></pre>
+
+<h2>3. Unquoted keys</h2>
+<p>Every key is a quoted string, even one that looks like a plain identifier.
+JavaScript object literals do not require this; JSON does.</p>
+<pre><code>{ name: "Ada" }            &larr; invalid
+{ "name": "Ada" }          &larr; valid</code></pre>
+<p>Together these three account for most failures, and all three have the same
+root cause: something pasted a JavaScript object literal where JSON was expected.
+They look nearly identical and they are not the same format.</p>
+
+<div class='adslot' data-ad='inArticle'></div>
+
+<h2>4. NaN, Infinity and undefined</h2>
+<p>JSON has exactly one number type and no way to express those three. A language
+that serialises them anyway produces output nothing else will read.</p>
+<pre><code>{ "ratio": NaN }           &larr; invalid
+{ "ratio": null }          &larr; valid</code></pre>
+<p>If you are generating JSON, decide what those values mean before serialising
+&mdash; usually <code>null</code>, occasionally a string, never the bare word.</p>
+
+<h2>5. Comments</h2>
+<p>JSON has no comments. Not <code>//</code>, not <code>/* */</code>, not
+<code>#</code>. This trips people up constantly in configuration files, because
+several tools accept a superset called JSON5 or JSONC that does allow them, and
+then a stricter parser downstream refuses the same file.</p>
+<p>If you need a note, add a key for it: <code>"_comment": "why this is 30"</code>.
+Ugly, valid, and it survives every parser.</p>
+
+<h2>6. Characters a word processor inserted</h2>
+<p>The one that wastes the most time, because the file looks correct on screen.
+Paste JSON through a document editor, a chat client or a CMS field and you can
+get back:</p>
+<ul>
+<li><strong>Smart quotes</strong> &mdash; <code>&ldquo;</code> and
+<code>&rdquo;</code> instead of <code>"</code>. Visually almost identical,
+completely different characters.</li>
+<li><strong>An en or em dash</strong> where a hyphen was typed.</li>
+<li><strong>A non-breaking space</strong> instead of a space.</li>
+<li><strong>A byte order mark</strong> at the very start of the file &mdash;
+invisible, and it makes the parser fail at position 0 on a document that looks
+perfect.</li>
+</ul>
+<p>The <a href='../index.html?t=text-cleaner'>text cleaner</a> strips smart
+quotes, invisible characters and the BOM in one pass, which turns this from a
+half-hour of staring into a fix.</p>
+
+<h2>Two things that are legal and still cause trouble</h2>
+<p><strong>Duplicate keys.</strong> <code>{"a":1,"a":2}</code> parses. The
+specification does not say which wins, and implementations differ &mdash; most
+take the last. If a value is mysteriously not what you set, check whether you set
+it twice.</p>
+<p><strong>Large numbers.</strong> JSON numbers have no size limit, but most
+parsers read them as IEEE 754 doubles, which lose precision above 2<sup>53</sup>.
+A 19-digit identifier will come back subtly wrong. Send those as strings.</p>
+
+<h2>A checking order</h2>
+<ol>
+<li>Paste it into a <a href='../index.html?t=json-formatter'>formatter</a> and
+read the reported position.</li>
+<li>Look at the few characters <em>before</em> that position.</li>
+<li>Search for <code>,]</code> and <code>,}</code> &mdash; that is the trailing
+comma, found instantly.</li>
+<li>Search for a single quote.</li>
+<li>If it still looks perfect, run it through the
+<a href='../index.html?t=text-cleaner'>text cleaner</a>. At that point it is
+almost always an invisible character.</li>
+</ol>
+
+</div>
+</article>
+
+<div class='share' id='share'></div>
+
+<section aria-labelledby='related'>
+  <h2 id='related' style='margin-top:44px;font-size:1.2rem'>Keep reading</h2>
+  <div class='cards'><a class='card' href='build-a-tool-site.html'><b>How this site serves 498 tools from one file</b><p>No framework, no build step, no server. What that buys, what it costs, and the three techniques that make it hold together.</p></a><a class='card' href='youtube-thumbnail-size.html'><b>YouTube thumbnail size: 1280 &times; 720, and what actually gets cropped</b><p>The recommended size is well documented. What nobody tells you is how small that image gets before anyone decides whether to click it.</p></a><a class='card' href='social-image-sizes.html'><b>Every social image size that matters, in one place</b><p>Forty-eight placements across thirteen platforms. Which ones share a size, which ones cannot be reused, and why the crop is the part that bites.</p></a></div>
+</section>
+
+<div class='adslot' data-ad='betweenSections'></div>
+
+</main>
+
+<div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
+<footer class='foot' id='ntfoot'></footer>
+
+<script src='../nt-config.js'></script>
+<script src='../nt.js' defer></script>
+</body>
+</html>
