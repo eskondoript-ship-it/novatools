@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang='en' data-base='../'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>YouTube thumbnail size: 1280x720, and what gets cropped</title>
+<meta name='description' content='Thumbnails are 1280x720 at 16:9. Where that image shrinks to 120px wide, what the duration badge covers, and how to design for it.'>
+<link rel='canonical' href='https://REPLACE-ME/blog/youtube-thumbnail-size.html'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+
+<meta property='og:type' content='article'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/blog/youtube-thumbnail-size.html'>
+<meta property='og:title' content='YouTube thumbnail size: 1280 x 720, and what actually gets cropped — NovaTools'>
+<meta property='og:description' content='Thumbnails are 1280x720 at 16:9. Where that image shrinks to 120px wide, what the duration badge covers, and how to design for it.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='YouTube thumbnail size: 1280 x 720, and what actually gets cropped — NovaTools'>
+<meta name='twitter:description' content='Thumbnails are 1280x720 at 16:9. Where that image shrinks to 120px wide, what the duration badge covers, and how to design for it.'>
+
+<!-- The theme is read before first paint. Doing this from the deferred script
+     instead would show a white flash to anyone who chose dark. -->
+<script>try{var t=localStorage.getItem('nt_theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel='stylesheet' href='../nt.css'>
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "BlogPosting",
+   "headline": "YouTube thumbnail size: 1280 x 720, and what actually gets cropped",
+   "description": "YouTube thumbnails are 1280x720 at 16:9. Here is where that image gets shrunk to 120px wide, what the duration badge covers, and how to design for the size people actually see.",
+   "url": "https://REPLACE-ME/blog/youtube-thumbnail-size.html",
+   "datePublished": "2026-08-06",
+   "dateModified": "2026-08-06",
+   "articleSection": "Video",
+   "inLanguage": "en-GB",
+   "isAccessibleForFree": true,
+   "author": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://REPLACE-ME/blog/youtube-thumbnail-size.html"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://REPLACE-ME/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Blog",
+     "item": "https://REPLACE-ME/blog.html"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Video",
+     "item": "https://REPLACE-ME/blog/youtube-thumbnail-size.html"
+    }
+   ]
+  }
+ ]
+}</script>
+</head>
+<body>
+<a class='skip' href='#main'>Skip to content</a>
+<div class='aurora' aria-hidden='true'><div class='blob b1'></div><div class='blob b2'></div><div class='gridlines'></div></div>
+
+<header class='nav' id='ntnav'></header>
+
+<main id='main' class='page'>
+<nav class='crumbs' aria-label='Breadcrumb'><a href='../index.html'>Home</a> &rsaquo; <a href='../blog.html'>Blog</a> &rsaquo; Video</nav>
+
+<article id='article'>
+<span class='eyebrow'>Video</span>
+<h1>YouTube thumbnail size: 1280 &times; 720, and what actually gets cropped</h1>
+<p class='lede'>The recommended size is well documented. What nobody tells you is how small that image gets before anyone decides whether to click it.</p>
+<div class='postmeta'>
+  <span class='avatar' aria-hidden='true'>N</span>
+  <span>NovaTools</span>
+  <span aria-hidden='true'>&middot;</span>
+  <time datetime='2026-08-06'>6 August 2026</time>
+  <span aria-hidden='true'>&middot;</span>
+  <span id='readtime'>&nbsp;</span>
+  <a class='tag' href='../blog.html#video'>Video</a>
+</div>
+
+<div class='adslot' data-ad='belowHero'></div>
+<div class='toc' id='toc' hidden></div>
+
+<div class='prose'>
+
+<h2>The numbers</h2>
+<p>YouTube asks for a thumbnail that is <strong>1280 pixels wide by 720
+pixels tall</strong> &mdash; a 16:9 rectangle, the same shape as the video
+player. The minimum accepted width is 640 pixels, the file has to come in under
+2&nbsp;MB, and JPG, PNG, GIF and BMP are all accepted.</p>
+<p>Use 1280&nbsp;&times;&nbsp;720 rather than the minimum. It is the size the
+player uses on a large screen, and uploading something smaller means YouTube
+upscales it for anyone watching on a television, which looks soft in exactly the
+context where your video is filling the whole screen.</p>
+<p>If you have an image at some other size, the
+<a href='../index.html?t=sz-youtube-thumbnail'>YouTube thumbnail resizer</a>
+crops it from the centre to fill 1280&nbsp;&times;&nbsp;720 rather than squashing
+it. That distinction matters more than it sounds: a cropped face still looks like
+a face, and a squashed one does not.</p>
+
+<h2>Where your thumbnail is actually seen</h2>
+<p>Almost nowhere at 1280 pixels. That is the file you upload; it is not the
+picture anyone makes a decision about. The same image is rendered at wildly
+different sizes depending on where it appears:</p>
+<div class='tablewrap'><table>
+<thead><tr><th>Placement</th><th>Roughly</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td>Desktop home page grid</td><td>360&nbsp;px wide</td><td>The generous case</td></tr>
+<tr><td>Mobile feed</td><td>Full phone width</td><td>Also generous, but seen while scrolling fast</td></tr>
+<tr><td>Desktop &ldquo;up next&rdquo; sidebar</td><td>168&nbsp;px wide</td><td>Body text is already unreadable</td></tr>
+<tr><td>Search results on mobile</td><td>~120&nbsp;px wide</td><td>Roughly a tenth of what you uploaded</td></tr>
+</tbody></table></div>
+<p>At 120 pixels wide, a 1280-pixel image has been reduced to about 9% of its
+linear size. Text set at 40 pixels in your design is under 4 pixels tall by the
+time it reaches that slot. It is not small; it is gone.</p>
+
+<div class='adslot' data-ad='inArticle'></div>
+
+<h2>Design for the smallest size, not the largest</h2>
+<p>The practical consequence is a rule that sounds crude and holds up well: your
+thumbnail should still communicate at 120 pixels wide.</p>
+<ul>
+<li><strong>Three or four words, maximum.</strong> If it needs a sentence, it
+belongs in the title, which has 100 characters and is rendered as actual text.</li>
+<li><strong>Enormous type.</strong> As a rough floor, text should be about a
+tenth of the image height &mdash; 70 pixels or so on a 720-pixel-tall canvas.
+That feels absurd in the editor and correct in the feed.</li>
+<li><strong>One subject.</strong> Two faces at 120 pixels are two blobs.</li>
+<li><strong>Contrast over detail.</strong> Downscaling destroys fine texture and
+preserves large areas of colour. A bright subject against a dark background
+survives; a subtle gradient does not.</li>
+</ul>
+<p>Test it honestly: export your thumbnail, shrink it to 120 pixels wide, and
+look at it from across the room. That is the real viewing condition.</p>
+
+<h2>What covers part of your image</h2>
+<p>Two things sit on top of the thumbnail in most placements, and both are in the
+bottom-right corner:</p>
+<ul>
+<li><strong>The duration badge</strong> &mdash; a small dark pill showing the
+video length. It occupies the bottom-right corner in essentially every grid and
+search placement.</li>
+<li><strong>The progress bar</strong> &mdash; a red line along the bottom edge
+for anyone who has already started watching.</li>
+</ul>
+<p>So keep the bottom-right corner clear of anything that matters, and keep the
+last few pixels along the bottom edge clear too. Some placements also round the
+corners, which nibbles a little off each one. The
+<a href='../index.html?t=safearea'>thumbnail safe area tool</a> overlays these
+zones on your own image so you can see what is covered rather than guessing.</p>
+
+<h2>The parts that are not about size</h2>
+<p>Two more constraints are worth knowing because they are easy to trip over:</p>
+<ul>
+<li><strong>Custom thumbnails need a verified account.</strong> Without
+verification YouTube picks a frame from the video for you.</li>
+<li><strong>The file has to be under 2&nbsp;MB.</strong> A 1280&nbsp;&times;&nbsp;720
+JPEG at sensible quality is usually 150&ndash;400&nbsp;KB, so this only bites if
+you export a PNG of a photograph. If yours is over,
+<a href='../index.html?t=img-compress'>compress it</a> &mdash; and read
+<a href='what-image-quality-does.html'>what the quality slider actually does</a>
+before you drag it to 50.</li>
+</ul>
+
+<h2>Shorts are a different shape</h2>
+<p>A Short is vertical: 1080&nbsp;&times;&nbsp;1920, 9:16. A 16:9 thumbnail
+placed on a Short gets centre-cropped into a tall frame, which throws away the
+left and right thirds of your design &mdash; usually including the text. If you
+publish both, make two images. The
+<a href='../index.html?t=sz-youtube-shorts-cover'>Shorts cover resizer</a>
+handles the vertical crop.</p>
+
+<h2>The short version</h2>
+<p>Upload 1280&nbsp;&times;&nbsp;720. Design as though it will be seen at 120
+pixels, because much of the time it will be. Keep the bottom-right corner clear.
+Three words, one subject, hard contrast. Everything else is decoration on an
+image nobody can see.</p>
+
+</div>
+</article>
+
+<div class='share' id='share'></div>
+
+<section aria-labelledby='related'>
+  <h2 id='related' style='margin-top:44px;font-size:1.2rem'>Keep reading</h2>
+  <div class='cards'><a class='card' href='social-image-sizes.html'><b>Every social image size that matters, in one place</b><p>Forty-eight placements across thirteen platforms. Which ones share a size, which ones cannot be reused, and why the crop is the part that bites.</p></a><a class='card' href='engagement-rate.html'><b>How to read your engagement rate without fooling yourself</b><p>Three formulas share the name. They give very different numbers from the same post, and the flattering one is the one most people quote.</p></a><a class='card' href='browser-tools-privacy.html'><b>Why browser tools do not upload your files, and how to check in a minute</b><p>Every free tool site claims your files are safe. Here is what the claim means technically, and the two ways to verify it yourself.</p></a></div>
+</section>
+
+<div class='adslot' data-ad='betweenSections'></div>
+
+</main>
+
+<div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
+<footer class='foot' id='ntfoot'></footer>
+
+<script src='../nt-config.js'></script>
+<script src='../nt.js' defer></script>
+</body>
+</html>
