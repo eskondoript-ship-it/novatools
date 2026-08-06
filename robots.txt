@@ -1,4 +1,14 @@
+# NovaTools
+# Replace REPLACE-ME with your domain in this file, and set `origin` in
+# nt-config.js to the same value.
+
 User-agent: *
 Allow: /
+
+# Nothing here is private, but a filtered view of the directory is the same
+# page with a different query string, and there is no value in indexing 11
+# copies of it.
+Disallow: /*?adpreview=
+Disallow: /*&adpreview=
 
 Sitemap: https://REPLACE-ME/sitemap.xml
