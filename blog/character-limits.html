@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang='en' data-base='../'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Character limits, and the ones that truncate silently</title>
+<meta name='description' content='Hard caps for YouTube, Instagram, TikTok, X and LinkedIn, plus the far shorter point where each one truncates in the feed.'>
+<link rel='canonical' href='https://REPLACE-ME/blog/character-limits.html'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+
+<meta property='og:type' content='article'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/blog/character-limits.html'>
+<meta property='og:title' content='Character limits, and the ones that truncate without telling you — NovaTools'>
+<meta property='og:description' content='Hard caps for YouTube, Instagram, TikTok, X and LinkedIn, plus the far shorter point where each one truncates in the feed.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='Character limits, and the ones that truncate without telling you — NovaTools'>
+<meta name='twitter:description' content='Hard caps for YouTube, Instagram, TikTok, X and LinkedIn, plus the far shorter point where each one truncates in the feed.'>
+
+<!-- The theme is read before first paint. Doing this from the deferred script
+     instead would show a white flash to anyone who chose dark. -->
+<script>try{var t=localStorage.getItem('nt_theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel='stylesheet' href='../nt.css'>
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "BlogPosting",
+   "headline": "Character limits, and the ones that truncate without telling you",
+   "description": "Character limits for YouTube, Instagram, TikTok, X, LinkedIn, Facebook and more, plus the far shorter point at which each one truncates in the feed and quietly hides your links.",
+   "url": "https://REPLACE-ME/blog/character-limits.html",
+   "datePublished": "2026-08-06",
+   "dateModified": "2026-08-06",
+   "articleSection": "Writing",
+   "inLanguage": "en-GB",
+   "isAccessibleForFree": true,
+   "author": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   },
+   "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://REPLACE-ME/blog/character-limits.html"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://REPLACE-ME/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Blog",
+     "item": "https://REPLACE-ME/blog.html"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "Writing",
+     "item": "https://REPLACE-ME/blog/character-limits.html"
+    }
+   ]
+  }
+ ]
+}</script>
+</head>
+<body>
+<a class='skip' href='#main'>Skip to content</a>
+<div class='aurora' aria-hidden='true'><div class='blob b1'></div><div class='blob b2'></div><div class='gridlines'></div></div>
+
+<header class='nav' id='ntnav'></header>
+
+<main id='main' class='page'>
+<nav class='crumbs' aria-label='Breadcrumb'><a href='../index.html'>Home</a> &rsaquo; <a href='../blog.html'>Blog</a> &rsaquo; Writing</nav>
+
+<article id='article'>
+<span class='eyebrow'>Writing</span>
+<h1>Character limits, and the ones that truncate without telling you</h1>
+<p class='lede'>Hitting the cap is the visible failure. The expensive one is the cutoff that happens hundreds of characters earlier, in the feed.</p>
+<div class='postmeta'>
+  <span class='avatar' aria-hidden='true'>N</span>
+  <span>NovaTools</span>
+  <span aria-hidden='true'>&middot;</span>
+  <time datetime='2026-08-06'>6 August 2026</time>
+  <span aria-hidden='true'>&middot;</span>
+  <span id='readtime'>&nbsp;</span>
+  <a class='tag' href='../blog.html#writing'>Writing</a>
+</div>
+
+<div class='adslot' data-ad='belowHero'></div>
+<div class='toc' id='toc' hidden></div>
+
+<div class='prose'>
+
+<h2>Two numbers, and the second one matters more</h2>
+<p>Every platform has a hard cap &mdash; the point where it stops accepting
+characters. Most also have a soft cutoff: the point where the feed stops showing
+your text and replaces the rest with &ldquo;more&rdquo;. The hard cap is
+announced. The soft cutoff is not, and it is usually an order of magnitude
+smaller.</p>
+<div class='tablewrap'><table>
+<thead><tr><th>Field</th><th>Hard cap</th><th>Visible before &ldquo;more&rdquo;</th></tr></thead>
+<tbody>
+<tr><td>Instagram caption</td><td>2,200</td><td>~125</td></tr>
+<tr><td>YouTube description</td><td>5,000</td><td>~150</td></tr>
+<tr><td>LinkedIn post</td><td>3,000</td><td>~210</td></tr>
+<tr><td>Facebook post</td><td>63,206</td><td>~477</td></tr>
+<tr><td>TikTok caption</td><td>2,200</td><td>Little, and it overlays the video</td></tr>
+<tr><td>X post</td><td>280</td><td>All of it</td></tr>
+</tbody></table></div>
+<p>An Instagram caption has room for 2,200 characters and shows 125. Write the
+first sentence as though it is the only one, because for most of the people
+scrolling past, it is.</p>
+
+<h2>The rest of the table</h2>
+<div class='tablewrap'><table>
+<thead><tr><th>Field</th><th>Limit</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td>YouTube title</td><td>100</td><td>Cut off in search well before this</td></tr>
+<tr><td>YouTube tags, all combined</td><td>500</td><td>Commas count</td></tr>
+<tr><td>YouTube comment</td><td>10,000</td><td></td></tr>
+<tr><td>YouTube channel description</td><td>1,000</td><td></td></tr>
+<tr><td>Instagram bio</td><td>150</td><td></td></tr>
+<tr><td>Instagram alt text</td><td>100</td><td></td></tr>
+<tr><td>TikTok bio</td><td>80</td><td>The tightest field on any major platform</td></tr>
+<tr><td>X bio</td><td>160</td><td></td></tr>
+<tr><td>LinkedIn headline</td><td>220</td><td>Follows you into every comment</td></tr>
+<tr><td>LinkedIn about</td><td>2,600</td><td></td></tr>
+<tr><td>Pinterest pin title</td><td>100</td><td></td></tr>
+<tr><td>Pinterest description</td><td>500</td><td></td></tr>
+<tr><td>Twitch stream title</td><td>140</td><td></td></tr>
+<tr><td>Discord message</td><td>2,000</td><td>4,000 with Nitro</td></tr>
+<tr><td>Reddit title</td><td>300</td><td></td></tr>
+<tr><td>Threads post</td><td>500</td><td></td></tr>
+<tr><td>Meta description (SEO)</td><td>~160</td><td>Google rewrites most of them anyway</td></tr>
+<tr><td>Page title (SEO)</td><td>~60</td><td>Truncated in results past about here</td></tr>
+</tbody></table></div>
+<p>Each of these has a <a href='../index.html'>live counter</a> on the site that
+shows the count against the cap as you type, and turns over when you pass it.</p>
+
+<div class='adslot' data-ad='inArticle'></div>
+
+<h2>The traps in counting</h2>
+<h3>Hashtags count</h3>
+<p>On Instagram and TikTok, hashtags come out of the same caption budget as the
+prose. Thirty hashtags at an average of twelve characters is 360 characters of
+your 2,200 &mdash; and, more importantly, they sit between your first line and
+everything after it. The usual fix is to put them in the first comment instead;
+there is a <a href='../index.html?t=tx-first-comment-builder'>tool for building
+that</a>.</p>
+
+<h3>Links are counted oddly</h3>
+<p>On X, every link counts as 23 characters no matter how long it is, because the
+platform rewrites it internally. A 200-character URL costs you 23. Shortening a
+link before posting to X saves nothing at all.</p>
+
+<h3>An emoji is not one character</h3>
+<p>Most platforms count in UTF-16 code units, which means many emoji cost two,
+and emoji built from sequences &mdash; skin tones, flags, families &mdash; cost
+considerably more. A family emoji can be seven or more units. If a caption is
+right on the limit and full of emoji, expect the platform's count to disagree
+with the one in your text editor.</p>
+
+<h3>A truncated description loses your links</h3>
+<p>This is the one that actually costs money. YouTube descriptions routinely end
+with affiliate links, sponsor codes and social handles. All of it sits after the
+&ldquo;more&rdquo; fold, and a description that gets truncated is one where
+nobody sees any of it. Put anything that must be seen in the first 150
+characters.</p>
+
+<h2>A working order</h2>
+<ol>
+<li>Write the first line to stand alone. Instagram shows 125 characters; YouTube
+shows 150. That is your headline whether you meant it to be or not.</li>
+<li>Put anything load-bearing &mdash; a link, a code, a call to action &mdash;
+before the fold.</li>
+<li>Check the count against the real cap with a counter, not by eye.</li>
+<li>Move hashtags to a first comment if the platform allows it.</li>
+<li>Assume every number here will change, and re-check the ones that matter.</li>
+</ol>
+
+</div>
+</article>
+
+<div class='share' id='share'></div>
+
+<section aria-labelledby='related'>
+  <h2 id='related' style='margin-top:44px;font-size:1.2rem'>Keep reading</h2>
+  <div class='cards'><a class='card' href='what-image-quality-does.html'><b>What the image quality slider actually does</b><p>Quality 80 is not "80% as good". Understanding what JPEG discards explains why 80 looks fine, 60 is often fine too, and re-saving is what kills an image.</p></a><a class='card' href='json-wont-parse.html'><b>JSON that will not parse: the six things it almost always is</b><p>A parse error names a position, not a cause. Here are the six mistakes behind nearly every one, in the order they are worth checking.</p></a><a class='card' href='build-a-tool-site.html'><b>How this site serves 498 tools from one file</b><p>No framework, no build step, no server. What that buys, what it costs, and the three techniques that make it hold together.</p></a></div>
+</section>
+
+<div class='adslot' data-ad='betweenSections'></div>
+
+</main>
+
+<div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
+<footer class='foot' id='ntfoot'></footer>
+
+<script src='../nt-config.js'></script>
+<script src='../nt.js' defer></script>
+</body>
+</html>
