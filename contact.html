@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Contact NovaTools — report a wrong size or a broken tool</title>
+<meta name='description' content='Report a size that is wrong, a tool that breaks in your browser, or a tool that should exist. Messages go to one person, so replies take a day or two.'>
+<link rel='canonical' href='https://REPLACE-ME/contact.html'>
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
+
+<meta property='og:type' content='website'>
+<meta property='og:site_name' content='NovaTools'>
+<meta property='og:url' content='https://REPLACE-ME/contact.html'>
+<meta property='og:title' content='Contact NovaTools'>
+<meta property='og:description' content='Report a size that is wrong, a tool that breaks in your browser, or a tool that should exist. Messages go to one person, so replies take a day or two.'>
+<meta property='og:locale' content='en_GB'>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='Contact NovaTools'>
+<meta name='twitter:description' content='Report a size that is wrong, a tool that breaks in your browser, or a tool that should exist. Messages go to one person, so replies take a day or two.'>
+
+<!-- The theme is read before first paint. Doing this from the deferred script
+     instead would show a white flash to anyone who chose dark. -->
+<script>try{var t=localStorage.getItem('nt_theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel='stylesheet' href='nt.css'>
+<script type='application/ld+json'>{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://REPLACE-ME/#org",
+   "name": "NovaTools",
+   "url": "https://REPLACE-ME/",
+   "description": "Free browser-based tools that run entirely on the visitor's device."
+  },
+  {
+   "@type": "ContactPage",
+   "name": "Contact NovaTools",
+   "url": "https://REPLACE-ME/contact.html",
+   "publisher": {
+    "@id": "https://REPLACE-ME/#org"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://REPLACE-ME/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Contact",
+     "item": "https://REPLACE-ME/contact.html"
+    }
+   ]
+  }
+ ]
+}</script>
+</head>
+<body>
+<a class='skip' href='#main'>Skip to content</a>
+<div class='aurora' aria-hidden='true'><div class='blob b1'></div><div class='blob b2'></div><div class='gridlines'></div></div>
+
+<header class='nav' id='ntnav'></header>
+
+<main id='main' class='page'>
+<nav class='crumbs' aria-label='Breadcrumb'><a href='index.html'>Home</a> &rsaquo; Contact</nav>
+
+<span class='eyebrow'>Contact</span>
+<h1>Get in touch</h1>
+<p class='lede'>A wrong size, a tool that breaks in your browser, a tool that
+should exist and does not &mdash; all of it is useful. This goes to one person,
+so expect a day or two rather than an hour.</p>
+
+<div class='prose'>
+<h2>Send a message</h2>
+</div>
+
+<form id='ntcontact' novalidate>
+  <div class='field'>
+    <label for='cname'>Your name</label>
+    <input id='cname' name='name' type='text' autocomplete='name'>
+  </div>
+  <div class='field'>
+    <label for='cemail'>Email <span aria-hidden='true'>*</span><span class='sr'>(required)</span></label>
+    <input id='cemail' name='email' type='email' autocomplete='email' required>
+  </div>
+  <div class='field'>
+    <label for='csubject'>Subject</label>
+    <input id='csubject' name='subject' type='text'>
+  </div>
+  <div class='field'>
+    <label for='cmessage'>Message <span aria-hidden='true'>*</span><span class='sr'>(required)</span></label>
+    <textarea id='cmessage' name='message' required></textarea>
+  </div>
+  <button class='cta' type='submit'>Send message</button>
+  <p class='formmsg' id='ntcontactmsg' role='status' aria-live='polite'></p>
+</form>
+
+<div class='prose'>
+<div class='note'><b>How this form behaves</b>
+If a form endpoint has been configured it posts your message directly. If not, it
+opens your own mail client with the message filled in, so you can see exactly
+what is being sent and to whom. It will never show you a confirmation for
+something that was not actually sent.</div>
+
+<h2>What is most useful to report</h2>
+<ul>
+<li><strong>A number that is wrong.</strong> Which tool, what it said, and what
+the platform's own documentation says. These get fixed fastest because the fix
+is one line in a table.</li>
+<li><strong>A tool that fails in your browser.</strong> Which browser and
+version, and what you had entered. Image tools in particular depend on encoder
+behaviour that differs between browsers.</li>
+<li><strong>A tool that should exist.</strong> Especially if it is a single
+well-defined job. The catalogue grows by adding rows to a table, so a good
+suggestion is cheap to act on.</li>
+</ul>
+
+<h2>Press, sponsorship and other business</h2>
+<p>Use the same form with a clear subject line. The site takes no sponsored
+listings at present; if that changes, sponsored placements will be labelled as
+such on the page they appear on, in line with the
+<a href='disclaimer.html'>Disclaimer</a>.</p>
+
+<h2>Privacy requests</h2>
+<p>We hold no personal data about visitors, so there is nothing to export or
+delete on our side &mdash; see the <a href='privacy.html'>Privacy Policy</a> for
+why. Requests about data held by an advertising or analytics provider have to go
+to that provider, as they are the controller of it. If you are not sure which
+applies, ask here and we will point you to the right place.</p>
+</div>
+
+</main>
+
+<div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
+<footer class='foot' id='ntfoot'></footer>
+
+<script src='nt-config.js'></script>
+<script src='nt.js' defer></script>
+</body>
+</html>
