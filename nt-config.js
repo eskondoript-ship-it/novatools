@@ -108,3 +108,28 @@ window.NT = {
     mastodon: ''
   }
 };
+
+/* ----------------------------------------------------------------------------
+   The AdSense loader, emitted here rather than in nt.js.
+
+   This file is in the <head> and is parser-blocking, so the tag below lands in
+   the head before the body is parsed. That matters for one reason: when you
+   add a site, AdSense fetches it and looks for its snippet, and a tag appended
+   by a deferred script after DOMContentLoaded is the usual reason it reports
+   "we couldn't find the code on your site". This is the same tag AdSense gives
+   you to paste, built from the client ID above.
+
+   With no client ID nothing is emitted: no request, no cookie, no consent
+   banner. nt.js checks the flag and does not add a second copy.
+   ---------------------------------------------------------------------------- */
+(function () {
+  var client = window.NT && window.NT.adsense && window.NT.adsense.client;
+  if (!client) return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.crossOrigin = 'anonymous';
+  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' +
+          encodeURIComponent(client);
+  document.head.appendChild(s);
+  window.__ntAdsLoader = true;
+})();
