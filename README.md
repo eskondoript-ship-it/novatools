@@ -1,7 +1,7 @@
 # NovaTools
 
 498 single-purpose tools that run entirely in the visitor's browser, plus the
-content and legal pages a site needs before it can carry advertising.
+content and legal pages a site needs before it can carry advertising.1
 
 Static files. No build step, no framework, no server, no package manager. Copy
 the folder to any static host and it works.
