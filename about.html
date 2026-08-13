@@ -5,12 +5,15 @@
 <meta name='viewport' content='width=device-width, initial-scale=1'>
 <title>About NovaTools — who builds it and how it works</title>
 <meta name='description' content='NovaTools is 498 single-purpose tools that run entirely in your browser. How the site is built, what it will not do, and how it pays for itself.'>
-<link rel='canonical' href='https://REPLACE-ME/about.html'>
+<link rel='canonical' href='https://mynovatools.com/about.html'>
+<link rel='icon' href='favicon.svg' type='image/svg+xml'>
+<link rel='apple-touch-icon' href='logo.svg'>
+<meta name='theme-color' content='#5A5BF6'>
 <meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1'>
 
 <meta property='og:type' content='website'>
 <meta property='og:site_name' content='NovaTools'>
-<meta property='og:url' content='https://REPLACE-ME/about.html'>
+<meta property='og:url' content='https://mynovatools.com/about.html'>
 <meta property='og:title' content='About NovaTools — who builds it and how it works'>
 <meta property='og:description' content='NovaTools is 498 single-purpose tools that run entirely in your browser. How the site is built, what it will not do, and how it pays for itself.'>
 <meta property='og:locale' content='en_GB'>
@@ -27,17 +30,17 @@
  "@graph": [
   {
    "@type": "Organization",
-   "@id": "https://REPLACE-ME/#org",
+   "@id": "https://mynovatools.com/#org",
    "name": "NovaTools",
-   "url": "https://REPLACE-ME/",
+   "url": "https://mynovatools.com/",
    "description": "Free browser-based tools that run entirely on the visitor's device."
   },
   {
    "@type": "AboutPage",
    "name": "About NovaTools",
-   "url": "https://REPLACE-ME/about.html",
+   "url": "https://mynovatools.com/about.html",
    "publisher": {
-    "@id": "https://REPLACE-ME/#org"
+    "@id": "https://mynovatools.com/#org"
    },
    "description": "How NovaTools is built and how it is funded."
   },
@@ -48,18 +51,22 @@
      "@type": "ListItem",
      "position": 1,
      "name": "Home",
-     "item": "https://REPLACE-ME/"
+     "item": "https://mynovatools.com/"
     },
     {
      "@type": "ListItem",
      "position": 2,
      "name": "About",
-     "item": "https://REPLACE-ME/about.html"
+     "item": "https://mynovatools.com/about.html"
     }
    ]
   }
  ]
 }</script>
+<!-- Site configuration. In the head, and parser-blocking, so the AdSense
+     loader it emits is in the document head before the body is parsed —
+     which is where AdSense's verifier looks for it. -->
+<script src='nt-config.js'></script>
 </head>
 <body>
 <a class='skip' href='#main'>Skip to content</a>
@@ -157,7 +164,6 @@ reads it. <a href='contact.html'>Get in touch</a>.</p>
 <div class='wrap'><div class='adslot' data-ad='aboveFooter'></div></div>
 <footer class='foot' id='ntfoot'></footer>
 
-<script src='nt-config.js'></script>
 <script src='nt.js' defer></script>
 </body>
 </html>

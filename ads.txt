@@ -1,4 +1,11 @@
-# Google AdSense fills this in for you once your account is approved.
-# Copy the exact line from AdSense > Sites > Ads.txt and replace this file.
-# Until then AdSense will warn "Earnings at risk" and it is right to.
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+# ads.txt — who is allowed to sell advertising on this domain.
+#
+# This file is a placeholder and authorises nobody. Once AdSense approves the
+# site, go to AdSense > Sites > Ads.txt, copy the single line it shows you, and
+# replace this whole file with it. It looks like:
+#
+#   google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+#
+# One line, no leading #, your own publisher ID. Until then AdSense will warn
+# "Earnings at risk", and it is right to: without ads.txt anyone can claim to
+# sell your inventory and buyers have no way to tell.

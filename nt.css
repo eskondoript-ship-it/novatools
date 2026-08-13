@@ -109,8 +109,10 @@ code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, Co
   background: color-mix(in oklab, var(--card) 78%, transparent);
   border-radius: calc(var(--radius) + 4px); padding: 8px 12px; box-shadow: var(--shadow-soft); }
 .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; color: inherit; font-weight: 600; }
-.brandsq { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 12px;
-  background: var(--gradient-brand); color: var(--primary-foreground); font-weight: 800; font-size: 15px; }
+.brandsq { display: block; width: 32px; height: 32px; border-radius: 10px; overflow: hidden;
+  flex: 0 0 auto; transition: transform .3s cubic-bezier(.22,1,.36,1); }
+.brandsq svg { display: block; width: 100%; height: 100%; }
+.brand:hover .brandsq { transform: rotate(-8deg) scale(1.06); }
 .navlinks { display: none; align-items: center; gap: 2px; margin-left: 8px; }
 @media (min-width: 900px) { .navlinks { display: flex; } }
 .navlinks a { border-radius: 10px; padding: 7px 12px; font-size: 14px; text-decoration: none;
@@ -174,7 +176,7 @@ h1 .g { background: var(--gradient-brand); -webkit-background-clip: text; backgr
 .note b { display: block; margin-bottom: 4px; }
 
 /* ---- cards ----------------------------------------------------------------- */
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 26px 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 16px; margin: 26px 0; }
 .card { border-radius: calc(var(--radius) + 6px); padding: 20px; text-decoration: none; color: inherit;
   border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
   background: color-mix(in oklab, var(--card) 60%, transparent);
@@ -221,7 +223,7 @@ input:focus, textarea:focus { border-color: color-mix(in oklab, var(--primary) 5
 /* ---- footer ----------------------------------------------------------------- */
 .foot { margin-top: 70px; padding: 52px 0 28px;
   border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent); }
-.footcols { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 30px; }
+.footcols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 30px; }
 .footcols h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px;
   color: var(--foreground); font-weight: 600; }
 .footcols a { display: block; color: var(--muted-foreground); text-decoration: none; font-size: 14px; padding: 4px 0; }
@@ -282,6 +284,48 @@ a.tag:hover, .tag.on { color: var(--foreground);
   border-color: color-mix(in oklab, var(--primary) 40%, transparent); }
 .post h2 { font-size: 1.2rem; font-weight: 600; letter-spacing: -.02em; }
 .post p { margin-top: 7px; color: var(--muted-foreground); font-size: 14.5px; }
+
+/* ---- fitting a finger ----
+   Same reasoning as the application page: only where the primary input is
+   coarse, and only on standalone controls. A link inside a sentence is left
+   alone — WCAG exempts it, and padding it would break the line it sits in. */
+@media (pointer: coarse) and (hover: none) {
+  .navlinks a, .footcols a, .tag, .social a { min-height: 40px; display: flex; align-items: center; }
+  .social a { justify-content: center; }
+  .iconbtn { min-width: 40px; min-height: 40px; }
+  .cta, .ghost { min-height: 42px; padding-top: 11px; padding-bottom: 11px; }
+  input, textarea, select { min-height: 44px; font-size: 16px; }
+  .toc a, .postlist .post { padding-top: 10px; padding-bottom: 10px; }
+  /* A breadcrumb trail is a row of destinations, not a sentence. */
+  .crumbs a { display: inline-block; padding: 11px 3px; }
+  .crumbs { margin-bottom: 12px; }
+  /* Secondary labels sized for a monitor are too small on any handheld,
+     tablets included — so this is tied to the input device, not the width. */
+  .tag, .adslot .adlabel { font-size: 12.5px; }
+}
+
+@media (max-width: 520px) {
+  .page { padding: 30px 16px 16px; }
+  .prose h2 { font-size: 1.3rem; }
+  .lede { font-size: 16px; }
+  .tag { font-size: 12.5px; }
+  /* A table wider than the phone scrolls inside its own box rather than
+     forcing the article to. Every table in the articles is already wrapped. */
+  .tablewrap { margin-inline: -16px; padding-inline: 16px; }
+}
+
+@media (max-width: 360px) {
+  .navin { padding: 6px 8px; gap: 6px; }
+  .page { padding-left: 13px; padding-right: 13px; }
+}
+
+/* Reading measure is a function of the text, not the screen. On a large
+   monitor the column stays put and the margins grow — which is correct — but
+   the footer and the nav can use the extra room. */
+@media (min-width: 1800px) {
+  .wrap { max-width: 1560px; }
+  .navin { max-width: 1560px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; animation-iteration-count: 1 !important;

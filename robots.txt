@@ -1,6 +1,5 @@
 # NovaTools
-# Replace REPLACE-ME with your domain in this file, and set `origin` in
-# nt-config.js to the same value.
+# The domain below and `origin` in nt-config.js must stay in step.
 
 User-agent: *
 Allow: /
@@ -11,4 +10,8 @@ Allow: /
 Disallow: /*?adpreview=
 Disallow: /*&adpreview=
 
-Sitemap: https://REPLACE-ME/sitemap.xml
+# While the site is new, point this at sitemap-launch.xml — the pages, the
+# hand-written tools and the 87 conversions people search for. Switch to
+# sitemap.xml, which adds the other 1,545 generated conversion pairs, once the
+# site is approved. See README.md.
+Sitemap: https://mynovatools.com/sitemap-launch.xml

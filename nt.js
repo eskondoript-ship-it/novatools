@@ -115,8 +115,8 @@
   var NAV = [
     ['index.html', 'Tools'],
     ['blog.html', 'Blog'],
-    ['about.html', 'About'],
     ['pricing.html', 'Pricing'],
+    ['about.html', 'About'],
     ['contact.html', 'Contact']
   ];
 
@@ -152,6 +152,12 @@
     x: 'X', github: 'GH', youtube: 'YT', linkedin: 'in', mastodon: 'M'
   };
 
+  /* The mark, inline rather than an <img>: it appears twice per page, it must
+     paint with the first frame rather than after a second request, and at 32px
+     an SVG file and 700 bytes of markup cost the same. logo.svg and favicon.svg
+     hold the same geometry for anywhere that needs a real file. */
+  var MARK = "<svg viewBox=\'0 0 64 64\' aria-hidden=\'true\'><defs><linearGradient id=\'ntlg\' x1=\'0\' y1=\'0\' x2=\'1\' y2=\'1\'><stop offset=\'0\' stop-color=\'#5A5BF6\'/><stop offset=\'.55\' stop-color=\'#00C3D6\'/><stop offset=\'1\' stop-color=\'#FF8AD8\'/></linearGradient></defs><rect x=\'2\' y=\'2\' width=\'60\' height=\'60\' rx=\'16\' fill=\'url(#ntlg)\'/><path fill=\'#fff\' d=\'M29 17 Q33.42 29.58 46 34 Q33.42 38.42 29 51 Q24.58 38.42 12 34 Q24.58 29.58 29 17 Z\'/><circle cx=\'47.5\' cy=\'16.5\' r=\'5\' fill=\'#fff\' fill-opacity=\'.94\'/></svg>";
+
   function here() {
     var p = location.pathname.split('/').pop();
     return p === '' ? 'index.html' : p;
@@ -165,7 +171,7 @@
     host.innerHTML =
       '<div class="navin">' +
         '<a class="brand" href="' + BASE + 'index.html">' +
-          '<span class="brandsq" aria-hidden="true">N</span><span>' + esc(C.name) + '</span></a>' +
+          '<span class="brandsq">' + MARK + '</span><span>' + esc(C.name) + '</span></a>' +
         '<div class="navlinks">' +
           NAV.map(function (l) {
             return '<a href="' + BASE + l[0] + '"' + (l[0] === cur ? ' aria-current="page"' : '') + '>' + l[1] + '</a>';
@@ -191,7 +197,7 @@
         '<div class="footcols">' +
           '<div>' +
             '<a class="brand" href="' + BASE + 'index.html" style="margin-bottom:12px">' +
-              '<span class="brandsq" aria-hidden="true">N</span><span>' + esc(C.name) + '</span></a>' +
+              '<span class="brandsq">' + MARK + '</span><span>' + esc(C.name) + '</span></a>' +
             '<p>' + esc(C.tagline || 'Free browser tools that never upload your files') + '</p>' +
             '<form class="news" id="ntnews" novalidate>' +
               '<label class="sr" for="ntnewsmail">Email address</label>' +
@@ -265,11 +271,17 @@
     });
 
     if (!client) return;
-    var s = el('script', {
-      async: '', crossorigin: 'anonymous',
-      src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(client)
-    });
-    document.head.appendChild(s);
+    /* nt-config.js emits the loader from the head, where AdSense's verifier
+       looks for it. This is the fallback for a page that somehow loaded nt.js
+       without it — never a second copy, which would double every request. */
+    if (!window.__ntAdsLoader) {
+      var s = el('script', {
+        async: '', crossorigin: 'anonymous',
+        src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(client)
+      });
+      document.head.appendChild(s);
+      window.__ntAdsLoader = true;
+    }
     if (C.adsense.autoAds) {
       document.head.appendChild(el('script', null,
         '(adsbygoogle=window.adsbygoogle||[]).push({google_ad_client:"' + client + '",enable_page_level_ads:true});'));
