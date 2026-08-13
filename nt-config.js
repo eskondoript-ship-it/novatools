@@ -28,7 +28,7 @@ window.NT = {
      them. Until you set it, canonical tags fall back to the address the page
      was actually loaded from, which is correct but does not deduplicate
      www / non-www. */
-  origin: '',                       // e.g. 'https://novatools.app'
+  origin: 'https://mynovatools.com',
   name: 'NovaTools',
   tagline: 'Free browser tools that never upload your files',
   owner: '',                        // the person or company operating the site
@@ -73,7 +73,7 @@ window.NT = {
      loads before the page has, so none of it costs you Largest Contentful
      Paint. */
   analytics: {
-    ga4: '',                        // 'G-XXXXXXXXXX'
+    ga4: 'G-RHGNY21721',
     clarity: '',                    // Microsoft Clarity project ID
     plausible: '',                  // your domain, e.g. 'novatools.app'
     plausibleHost: 'https://plausible.io',
