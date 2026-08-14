@@ -1046,6 +1046,26 @@ kbd { font-size: 11px; border-radius: 6px; padding: 1px 5px; font-family: inheri
    NovaClip assistant, which has a backend and a key of its own.
    --------------------------------------------------------------------------- */
 const TOOLS = [
+  { id:'percent', cat:'math', name:'Percentage calculator',
+    desc:'Five of them: X% of Y, X as a % of Y, the change between two numbers, and adding or taking off a %.' },
+  { id:'stats-calc', cat:'math', name:'Average, median and spread',
+    desc:'Paste any list of numbers and get the mean, median, mode, range and standard deviation.' },
+  { id:'fraction', cat:'math', name:'Fraction and decimal',
+    desc:'Either way round, simplified, with the percentage. Decimals become the neatest fraction, not x/10000.' },
+  { id:'cpm-calc', cat:'marketing', name:'CPM, CPC and cost per conversion',
+    desc:'Spend, impressions, clicks and conversions in — every rate a campaign report asks for out.' },
+  { id:'roi-calc', cat:'marketing', name:'ROI calculator',
+    desc:'Profit, return on investment, and what one unit of spend actually brought back.' },
+  { id:'caption-split', cat:'social', name:'Caption splitter',
+    desc:'Breaks a long caption into numbered parts that fit the limit, never cutting a word in half.' },
+  { id:'hashtag-extract', cat:'social', name:'Hashtag and mention finder',
+    desc:'Pulls every #tag and @mention out of a block of text, counts the repeats and sorts by use.' },
+  { id:'timecode', cat:'video', name:'Timecode converter',
+    desc:'HH:MM:SS:FF, seconds and frame counts, at any of eight frame rates including the 29.97 ones.' },
+  { id:'bpm-tap', cat:'audio', name:'Tap the tempo',
+    desc:'Tap along to a track to read its BPM, with a wobble figure that says whether to trust the number.' },
+  { id:'tone-gen', cat:'audio', name:'Tone generator',
+    desc:'A sine, square, saw or triangle tone at any frequency, ramped at both ends so it does not click.' },
   { id:'soundboard', cat:'audio', name:'Sound effects board',
     desc:'97 effects, every one generated in your browser. Play them, or save any as a WAV.' },
   { id:'cleanup', cat:'images', name:'Remove something from a photo',
@@ -1364,6 +1384,321 @@ function copyOut() {
 const goRow = '<div class="btns"><button class="go" id="go">Run</button><button class="alt" id="copy">Copy</button></div>';
 
 const IMPL = {
+  /* ---- Maths ---------------------------------------------------------- */
+  'percent': {
+    html: '<div class="field"><label>What do you want?</label><select id="mode">' +
+      ['X% of Y','X is what % of Y','Change from X to Y','Add X% to Y','Take X% off Y']
+        .map(m => '<option>' + m + '</option>').join('') + '</select></div>' +
+      '<div class="two"><div class="field"><label>X</label><input id="x" type="number" step="any" value="15"></div>' +
+      '<div class="field"><label>Y</label><input id="y" type="number" step="any" value="200"></div></div>' +
+      goRow + outBox,
+    wire() {
+      const run = () => {
+        const x = parseFloat($('x').value), y = parseFloat($('y').value), m = $('mode').value;
+        if (!isFinite(x) || !isFinite(y)) return setOut('Both boxes need a number.', true);
+        let r, note;
+        if (m === 'X% of Y') { r = y * x / 100; note = x + '% of ' + y + ' is ' + round(r); }
+        else if (m === 'X is what % of Y') {
+          if (!y) return setOut('Y cannot be zero — nothing is a percentage of nothing.', true);
+          r = x / y * 100; note = x + ' is ' + round(r) + '% of ' + y;
+        } else if (m === 'Change from X to Y') {
+          if (!x) return setOut('A change from zero has no percentage.', true);
+          r = (y - x) / Math.abs(x) * 100;
+          note = (r >= 0 ? 'Up ' : 'Down ') + round(Math.abs(r)) + '% (' + round(y - x) + ')';
+        } else if (m === 'Add X% to Y') { r = y * (1 + x / 100); note = y + ' plus ' + x + '% is ' + round(r); }
+        else { r = y * (1 - x / 100); note = y + ' minus ' + x + '% is ' + round(r); }
+        setOut(note);
+      };
+      const round = n => Math.round(n * 10000) / 10000;
+      $('go').onclick = run; $('copy').onclick = copyOut;
+      ['x','y','mode'].forEach(id => $(id).oninput = run);
+      run();
+    }
+  },
+
+  'stats-calc': {
+    html: ta('t', '12, 7, 19, 7, 3\nor one number per line') + '<div class="stats" id="st"></div>',
+    wire() {
+      const calc = () => {
+        const nums = ($('t').value.match(/-?\d+(\.\d+)?/g) || []).map(Number);
+        if (!nums.length) { $('st').innerHTML = ''; return; }
+        const n = nums.length, sum = nums.reduce((a, b) => a + b, 0), mean = sum / n;
+        const sorted = nums.slice().sort((a, b) => a - b);
+        const mid = Math.floor(n / 2);
+        const median = n % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        /* Population standard deviation. The sample version divides by n-1 and
+           is the right one when the numbers are a sample of something bigger;
+           for "here are my last 20 videos" the population form is what people
+           actually mean. */
+        const sd = Math.sqrt(nums.reduce((a, b) => a + (b - mean) * (b - mean), 0) / n);
+        const counts = {}; let mode = null, best = 0;
+        nums.forEach(v => { counts[v] = (counts[v] || 0) + 1; if (counts[v] > best) { best = counts[v]; mode = v; } });
+        const r = v => Math.round(v * 1000) / 1000;
+        $('st').innerHTML =
+          stat(n, 'count') + stat(r(sum), 'sum') + stat(r(mean), 'mean') +
+          stat(r(median), 'median') + stat(best > 1 ? mode : '—', 'mode') +
+          stat(r(sd), 'std dev') + stat(r(sorted[0]), 'lowest') + stat(r(sorted[n - 1]), 'highest') +
+          stat(r(sorted[n - 1] - sorted[0]), 'range');
+      };
+      $('t').oninput = calc; calc();
+    }
+  },
+
+  'fraction': {
+    html: '<div class="field"><label>A fraction (3/8) or a decimal (0.375)</label>' +
+      '<input id="v" type="text" value="3/8"></div>' + goRow + outBox,
+    wire() {
+      const gcd = (a, b) => b ? gcd(b, a % b) : a;
+      const run = () => {
+        const s = $('v').value.trim();
+        if (!s) return setOut('Type a fraction or a decimal.', true);
+        if (s.indexOf('/') > -1) {
+          const p = s.split('/'), a = parseFloat(p[0]), b = parseFloat(p[1]);
+          if (!isFinite(a) || !isFinite(b) || !b) return setOut('That is not a fraction I can read.', true);
+          const g = Math.abs(gcd(Math.round(a), Math.round(b))) || 1;
+          setOut(a + '/' + b + '  =  ' + (a / b) + '\nsimplest form: ' + (a / g) + '/' + (b / g) +
+                 '\npercent: ' + Math.round(a / b * 10000) / 100 + '%');
+        } else {
+          const d = parseFloat(s);
+          if (!isFinite(d)) return setOut('That is not a number I can read.', true);
+          /* Continued fractions: the standard way to get the nicest fraction
+             for a decimal rather than always landing on x/10000. */
+          let h1 = 1, h2 = 0, k1 = 0, k2 = 1, b = d;
+          for (let i = 0; i < 24; i++) {
+            const a = Math.floor(b);
+            [h1, h2] = [a * h1 + h2, h1];
+            [k1, k2] = [a * k1 + k2, k1];
+            if (Math.abs(d - h1 / k1) < 1e-10) break;
+            b = 1 / (b - a);
+            if (!isFinite(b)) break;
+          }
+          setOut(d + '  =  ' + h1 + '/' + k1 + '\npercent: ' + Math.round(d * 10000) / 100 + '%');
+        }
+      };
+      $('go').onclick = run; $('copy').onclick = copyOut; $('v').oninput = run; run();
+    }
+  },
+
+  /* ---- Marketing ------------------------------------------------------- */
+  'cpm-calc': {
+    html: '<div class="two"><div class="field"><label>Spend</label><input id="spend" type="number" step="any" value="250"></div>' +
+      '<div class="field"><label>Impressions</label><input id="imps" type="number" step="any" value="120000"></div></div>' +
+      '<div class="two"><div class="field"><label>Clicks</label><input id="clicks" type="number" step="any" value="1800"></div>' +
+      '<div class="field"><label>Conversions</label><input id="convs" type="number" step="any" value="72"></div></div>' +
+      '<div class="stats" id="st"></div>',
+    wire() {
+      const calc = () => {
+        const spend = +$('spend').value, imps = +$('imps').value, clicks = +$('clicks').value, convs = +$('convs').value;
+        const m = n => isFinite(n) && n !== Infinity ? n : '—';
+        const money = n => isFinite(n) ? (Math.round(n * 100) / 100) : '—';
+        $('st').innerHTML =
+          stat(imps ? money(spend / imps * 1000) : '—', 'CPM') +
+          stat(clicks ? money(spend / clicks) : '—', 'CPC') +
+          stat(convs ? money(spend / convs) : '—', 'cost / conversion') +
+          stat(imps ? m(Math.round(clicks / imps * 10000) / 100) + '%' : '—', 'CTR') +
+          stat(clicks ? m(Math.round(convs / clicks * 10000) / 100) + '%' : '—', 'conversion rate');
+      };
+      ['spend','imps','clicks','convs'].forEach(id => $(id).oninput = calc);
+      calc();
+    }
+  },
+
+  'roi-calc': {
+    html: '<div class="two"><div class="field"><label>What it cost</label><input id="cost" type="number" step="any" value="500"></div>' +
+      '<div class="field"><label>What it brought back</label><input id="ret" type="number" step="any" value="1250"></div></div>' +
+      goRow + outBox,
+    wire() {
+      const run = () => {
+        const c = parseFloat($('cost').value), r = parseFloat($('ret').value);
+        if (!isFinite(c) || !isFinite(r)) return setOut('Both boxes need a number.', true);
+        if (!c) return setOut('A return on zero spend has no percentage.', true);
+        const profit = r - c, roi = profit / c * 100;
+        setOut('Profit: ' + (Math.round(profit * 100) / 100) +
+               '\nROI: ' + (Math.round(roi * 100) / 100) + '%' +
+               '\nFor every 1 spent you get ' + (Math.round(r / c * 100) / 100) + ' back.' +
+               (roi < 0 ? '\nThis one lost money.' : ''));
+      };
+      $('go').onclick = run; $('copy').onclick = copyOut;
+      ['cost','ret'].forEach(id => $(id).oninput = run);
+      run();
+    }
+  },
+
+  /* ---- Social ---------------------------------------------------------- */
+  'caption-split': {
+    html: ta('t', 'A long caption to break into numbered parts…') +
+      '<div class="two"><div class="field"><label>Characters per part</label><input id="len" type="number" value="280"></div>' +
+      '<div class="field"><label>Number them</label><select id="num"><option>1/5</option><option>(1 of 5)</option><option>No</option></select></div></div>' +
+      goRow + outBox,
+    wire() {
+      const run = () => {
+        const text = $('t').value.trim(), lim = Math.max(40, +$('len').value || 280), style = $('num').value;
+        if (!text) return setOut('Nothing to split yet.', true);
+        /* Split on whitespace and refill, so a part never ends mid-word. The
+           numbering is measured before filling, because "12/12" is four
+           characters that still have to fit inside the limit. */
+        const tagLen = style === 'No' ? 0 : (style === '1/5' ? 8 : 12);
+        const room = Math.max(20, lim - tagLen);
+        const words = text.split(/\s+/);
+        const parts = []; let cur = '';
+        words.forEach(w => {
+          if ((cur + ' ' + w).trim().length > room) { if (cur) parts.push(cur.trim()); cur = w; }
+          else cur = (cur + ' ' + w).trim();
+        });
+        if (cur) parts.push(cur.trim());
+        const out = parts.map((p, i) => {
+          if (style === 'No') return p;
+          const tag = style === '1/5' ? (i + 1) + '/' + parts.length : '(' + (i + 1) + ' of ' + parts.length + ')';
+          return p + ' ' + tag;
+        });
+        setOut(out.join('\n\n———\n\n') + '\n\n' + parts.length + ' parts, longest ' +
+               Math.max.apply(null, out.map(o => o.length)) + ' characters.');
+      };
+      $('go').onclick = run; $('copy').onclick = copyOut;
+      ['t','len','num'].forEach(id => $(id).oninput = run);
+      run();
+    }
+  },
+
+  'hashtag-extract': {
+    html: ta('t', 'Paste a caption, a comment thread, anything…') + '<div class="stats" id="st"></div>' + outBox,
+    wire() {
+      const run = () => {
+        const v = $('t').value;
+        const tags = (v.match(/#[\p{L}\p{N}_]+/gu) || []).map(t => t.toLowerCase());
+        const mentions = (v.match(/@[\p{L}\p{N}_.]+/gu) || []).map(t => t.toLowerCase());
+        const counts = {};
+        tags.forEach(t => counts[t] = (counts[t] || 0) + 1);
+        const uniq = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+        $('st').innerHTML = stat(tags.length, 'hashtags') + stat(uniq.length, 'unique') +
+          stat(mentions.length, 'mentions') + stat(v.length, 'characters');
+        setOut(uniq.length
+          ? uniq.map(t => t + (counts[t] > 1 ? '  ×' + counts[t] : '')).join('\n') +
+            (mentions.length ? '\n\nMentions:\n' + [...new Set(mentions)].join('\n') : '')
+          : 'No hashtags in there yet.');
+      };
+      $('t').oninput = run; run();
+    }
+  },
+
+  /* ---- Video ----------------------------------------------------------- */
+  'timecode': {
+    html: '<div class="field"><label>Timecode, seconds or frames</label><input id="v" type="text" value="00:01:23:12"></div>' +
+      '<div class="field"><label>Frame rate</label><select id="fps">' +
+      ['23.976','24','25','29.97','30','50','59.94','60'].map(f => '<option' + (f === '25' ? ' selected' : '') + '>' + f + '</option>').join('') +
+      '</select></div>' + goRow + outBox,
+    wire() {
+      const run = () => {
+        const raw = $('v').value.trim(), fps = parseFloat($('fps').value);
+        if (!raw) return setOut('Type a timecode, a number of seconds, or a frame count.', true);
+        let secs;
+        if (raw.indexOf(':') > -1) {
+          const p = raw.split(':').map(Number);
+          if (p.some(n => !isFinite(n))) return setOut('That timecode has something in it I cannot read.', true);
+          /* HH:MM:SS:FF if there are four parts, HH:MM:SS if three. */
+          if (p.length === 4) secs = p[0] * 3600 + p[1] * 60 + p[2] + p[3] / fps;
+          else if (p.length === 3) secs = p[0] * 3600 + p[1] * 60 + p[2];
+          else if (p.length === 2) secs = p[0] * 60 + p[1];
+          else return setOut('Use HH:MM:SS or HH:MM:SS:FF.', true);
+        } else {
+          const n = parseFloat(raw);
+          if (!isFinite(n)) return setOut('That is not a number I can read.', true);
+          /* A bare number over 10000 is far more likely a frame count than
+             nearly three hours of seconds. */
+          secs = n > 10000 ? n / fps : n;
+        }
+        const frames = Math.round(secs * fps);
+        const pad = n => String(Math.floor(n)).padStart(2, '0');
+        const h = secs / 3600, m = (secs % 3600) / 60, s = secs % 60;
+        const ff = Math.round((secs - Math.floor(secs)) * fps);
+        setOut('Timecode: ' + pad(h) + ':' + pad(m) + ':' + pad(s) + ':' + pad(ff) +
+               '\nSeconds:  ' + (Math.round(secs * 1000) / 1000) +
+               '\nFrames:   ' + frames +
+               '\nAt ' + fps + ' fps.');
+      };
+      $('go').onclick = run; $('copy').onclick = copyOut;
+      ['v','fps'].forEach(id => $(id).oninput = run);
+      run();
+    }
+  },
+
+  /* ---- Audio ----------------------------------------------------------- */
+  'bpm-tap': {
+    html: '<div class="btns"><button class="go" id="tap" style="min-width:190px">Tap on the beat</button>' +
+      '<button class="alt" id="clear">Reset</button></div><div class="stats" id="st"></div>' +
+      '<p class="hint">Tap eight or more times for a steady reading. The average uses ' +
+      'only the last twelve gaps, so speeding up or slowing down is followed rather than averaged away.</p>',
+    wire() {
+      let times = [];
+      const show = () => {
+        const gaps = [];
+        for (let i = 1; i < times.length; i++) gaps.push(times[i] - times[i - 1]);
+        const use = gaps.slice(-12);
+        if (!use.length) { $('st').innerHTML = stat('—', 'BPM') + stat(times.length, 'taps'); return; }
+        const avg = use.reduce((a, b) => a + b, 0) / use.length;
+        const bpm = 60000 / avg;
+        /* Spread of the gaps says whether the tapping was steady enough to
+           trust the number, which a single BPM figure cannot. */
+        const sd = Math.sqrt(use.reduce((a, b) => a + (b - avg) * (b - avg), 0) / use.length);
+        $('st').innerHTML =
+          stat(Math.round(bpm), 'BPM') + stat(Math.round(bpm * 2) / 2, 'to nearest ½') +
+          stat(times.length, 'taps') + stat(Math.round(avg) + ' ms', 'gap') +
+          stat(Math.round(sd) + ' ms', 'wobble') +
+          stat(sd < 25 ? 'steady' : (sd < 60 ? 'ok' : 'keep going'), 'reading');
+      };
+      $('tap').onclick = () => {
+        const now = performance.now();
+        /* Two seconds of silence means a new attempt, not a very slow song. */
+        if (times.length && now - times[times.length - 1] > 2000) times = [];
+        times.push(now); show();
+      };
+      $('clear').onclick = () => { times = []; show(); };
+      show();
+    }
+  },
+
+  'tone-gen': {
+    html: '<div class="two"><div class="field"><label>Frequency (Hz)</label><input id="hz" type="number" value="440"></div>' +
+      '<div class="field"><label>Seconds</label><input id="sec" type="number" step="0.1" value="2"></div></div>' +
+      '<div class="two"><div class="field"><label>Shape</label><select id="wave">' +
+      ['sine','square','sawtooth','triangle'].map(w => '<option>' + w + '</option>').join('') + '</select></div>' +
+      '<div class="field"><label>Volume</label><input id="vol" type="range" min="0" max="100" value="35"></div></div>' +
+      '<div class="btns"><button class="go" id="play">Play</button><button class="alt" id="stop">Stop</button></div>' +
+      '<p class="hint">A440 is the A above middle C, the note orchestras tune to. ' +
+      'The volume ramps over 20ms at each end — a tone that starts instantly makes a click.</p>',
+    wire() {
+      let ctx = null, osc = null, gain = null;
+      const stop = () => {
+        if (!osc) return;
+        const t = ctx.currentTime;
+        gain.gain.cancelScheduledValues(t);
+        gain.gain.setValueAtTime(gain.gain.value, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.02);
+        osc.stop(t + 0.03);
+        osc = null;
+      };
+      $('play').onclick = () => {
+        stop();
+        ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const hz = Math.min(20000, Math.max(20, +$('hz').value || 440));
+        const dur = Math.min(30, Math.max(0.1, +$('sec').value || 2));
+        const v = (+$('vol').value || 0) / 100 * 0.6;
+        osc = ctx.createOscillator(); gain = ctx.createGain();
+        osc.type = $('wave').value; osc.frequency.value = hz;
+        const t = ctx.currentTime;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(v, t + 0.02);
+        gain.gain.setValueAtTime(v, t + dur - 0.02);
+        gain.gain.linearRampToValueAtTime(0, t + dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(t); osc.stop(t + dur + 0.01);
+        osc.onended = () => { osc = null; };
+      };
+      $('stop').onclick = stop;
+    }
+  },
+
   'word-counter': {
     html: ta('t', 'Paste or type…') + '<div class="stats" id="st"></div>',
     wire() {
